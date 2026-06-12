@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* OVERRIDE: THE BILLION DOLLAR AESTHETIC */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #010103;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* OVERRIDE: APEX TERMINAL DATA FONT */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* CUSTOM SCROLLBAR FOR HEDGE FUND LOOK */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(128, 222, 234, 0.2);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 222, 234, 0.5);
+}
