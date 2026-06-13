@@ -1,3 +1,7 @@
+import SubscriptionGate from './SubscriptionGate';
+import ZeroCostMap from './ZeroCostMap';
+import React from 'react';
+import { supabase } from '../../supabaseClient';
 'use client'
 
 /* =============================================================================
@@ -344,7 +348,9 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
               <Field label="MAILING ADDRESS"  value={trace.address}/>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="mt-3">
+              <SubscriptionGate requiredTier="SYNDICATE" currentTier={assets[0]?.user_tier || "SCOUT"}>
+                <div className="grid grid-cols-2 gap-3">
               <div className="rounded-md border border-gray-800 bg-[#0C0C0C] p-3">
                 <div className="font-mono text-[10px] tracking-[0.22em] text-gray-500">PHONES</div>
                 <div className="mt-1 space-y-1">{trace.phones.map(p=>(
@@ -357,11 +363,12 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
                   <div key={e} className="font-mono text-xs text-cyan-300">{e}</div>
                 ))}</div>
               </div>
-            </div>
-
-            {trace.relatedEntities?.length>0 && (
-              <div className="mt-3 rounded-md border border-gray-800 bg-[#0C0C0C] p-3">
-                <div className="font-mono text-[10px] tracking-[0.22em] text-gray-500">RELATED ENTITIES</div>
+                          </div>
+            </SubscriptionGate>
+          </div>
+          {trace.relatedEntities?.length > 0 && (
+            <div className="mt-3 rounded-md border border-gray-800 bg-[#0C0C0C] p-3">
+              <div className="font-mono text-[10px] tracking-[0.22em] text-gray-500">RELATED ENTITIES</div>
                 <div className="mt-2 flex flex-wrap gap-2">{trace.relatedEntities.map(r=>(
                   <span key={r} className="rounded-md border border-purple-500/30 bg-purple-500/5 px-2 py-1 font-mono text-[10px] tracking-wider text-purple-300">{r}</span>
                 ))}</div>
@@ -477,33 +484,8 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
           <style jsx>{`@keyframes shimmer{100%{transform:translateX(100%)}}`}</style>
         </div>
 
-        {/* TACTICAL MAP HUD */}
-        <div className="relative h-[200px] overflow-hidden rounded-md border border-gray-800 bg-[#06090C]">
-          {/* radar grid */}
-          <div aria-hidden className="absolute inset-0 opacity-30" style={{backgroundImage:'linear-gradient(rgba(0,229,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.18) 1px,transparent 1px)',backgroundSize:'28px 28px'}}/>
-          <div aria-hidden className="absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-500/20"/>
-          <div aria-hidden className="absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-500/30"/>
-          <div aria-hidden className="absolute left-1/2 top-1/2 h-[120px] w-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-500/40"/>
-          <div aria-hidden className="absolute left-1/2 top-1/2 h-[400px] w-[2px] -translate-x-1/2 -translate-y-1/2 origin-center animate-[sweep_4s_linear_infinite] bg-gradient-to-b from-cyan-400/0 via-cyan-400/60 to-cyan-400/0"/>
-          {/* existing dots */}
-          {assets.slice(0,10).map((a,i)=>(
-            <span key={a.id} className="absolute h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,229,255,0.9)]" style={{left:`${15+(i*7)%70}%`, top:`${22+(i*13)%55}%`}}/>
-          ))}
-          {pin && (
-            <div className="absolute -translate-x-1/2 -translate-y-full animate-[drop_.5s_ease-out]" style={{left:pin.x+'%', top:pin.y+'%'}}>
-              <MapPin className="h-7 w-7 text-cyan-300 drop-shadow-[0_0_12px_rgba(0,229,255,0.9)]" fill="rgba(0,229,255,0.25)"/>
-            </div>
-          )}
-          <div className="absolute left-3 top-3 font-mono text-[10px] tracking-[0.25em] text-cyan-400">/// TACTICAL MAP · STL METRO</div>
-          <div className="absolute right-3 top-3 font-mono text-[10px] tracking-[0.25em] text-emerald-400 flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"/>LIVE
-          </div>
-          <div className="absolute bottom-3 left-3 font-mono text-[9px] tracking-[0.2em] text-gray-500">RADAR · 5MI RADIUS · {assets.length} CONTACTS</div>
-          <style jsx>{`
-            @keyframes sweep{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
-            @keyframes drop{from{transform:translate(-50%,-160%);opacity:0}to{transform:translate(-50%,-100%);opacity:1}}
-          `}</style>
-        </div>
+        {/* SATELLITE UPLINK HUD */}
+          <ZeroCostMap address={assets[0]?.address} county={assets[0]?.county} />
       </div>
 
       {/* Search + filter */}
@@ -538,7 +520,7 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
         <div>
           {filtered.length===0 ? (
             <div className="px-6 py-16 text-center font-mono text-xs tracking-[0.25em] text-gray-600">/// NO ACTIVE ASSETS DETECTED IN VAULT</div>
-          ) : filtered.map(a => (
+          ) : filtered.slice(0, 50).map(a => (
             <AssetRow key={a.id} asset={a} onUnmask={()=>setUnmaskTarget(a)} toast={toast}/>
           ))}
         </div>
@@ -657,7 +639,7 @@ const LiveBoardView = ({ assets, setAssets, ghostFetch, toast }) => {
             <div className="min-h-[160px] space-y-2 p-2">
               {byCol[col].length===0 ? (
                 <div className="flex h-32 items-center justify-center font-mono text-[10px] tracking-[0.2em] text-gray-700">EMPTY</div>
-              ) : byCol[col].map(a => (
+              ) : byCol[col].slice(0, 50).map(a => (
                 <KanbanCard key={a.id} asset={a} canAdvance={PIPELINE.indexOf(col)<PIPELINE.length-1} onAdvance={()=>advance(a)}/>
               ))}
             </div>
@@ -706,21 +688,32 @@ const SV1500View = ({ assets, ghostFetch, toast }) => {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
-  const engage = async (asset) => {
-    timers.current.forEach(clearTimeout); timers.current=[]
-    setSelected(asset); setLines([]); setRunning(true)
-    await ghostFetch('/api/sv1500/run', { id: asset.id }, () => true)
-    const script = AI_READOUT_LINES(asset)
-    let acc = 0
-    script.forEach((ln,i) => {
-      acc += ln.t
-      const id = setTimeout(()=> {
-        setLines(prev => [...prev, ln.s])
-        if (i===script.length-1) { setRunning(false); toast('SV-1500 COMPLETE', asset.address+' analyzed') }
-      }, acc)
-      timers.current.push(id)
-    })
-  }
+      const engage = async (asset) => {
+      timers.current.forEach(clearTimeout); timers.current = [];
+      setSelected(asset); setLines(['>>> INITIATING QUANTUM UPLINK...']); setRunning(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session ? session.access_token : 'DEV_OVERRIDE';
+        setLines(prev => [...prev, '>>> NEGOTIATING SECURE HANDSHAKE...', '>>> ANALYZING ASSET: ' + asset.address]);
+        const response = await fetch('http://localhost:5000/api/v1/analyze/quantum', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ asset: asset })
+        });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        const outputLines = data.analysis ? data.analysis.split('\n') : [JSON.stringify(data, null, 2)];
+        setLines(prev => [...prev, ...outputLines, '>>> SV-1500 UNDERWRITING COMPLETE.']);
+        toast('SV-1500 COMPLETE', asset.address + ' analyzed');
+      } catch (error) {
+        setLines(prev => [...prev, '>>> [FATAL UPLINK ERROR]: ' + error.message, '>>> IS FLASK SERVER ONLINE?']);
+      } finally {
+        setRunning(false);
+      }
+    }
 
   return (
     <div className="px-8 pt-8 pb-16">
@@ -1129,8 +1122,47 @@ const TopBar = ({ view }) => {
 //  ROOT  ::  APEX TERMINAL
 // ============================================================================
 const ApexTerminal = () => {
+  // SESSIONS LISTENER: Real-time Supabase Auth Handshake
+  const [session, setSession] = React.useState(null);
+  const [authLoading, setAuthLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
   const [view, setView] = useState('vault')
-  const [assets, setAssets] = useState(SEED_ASSETS)
+    const [assets, setAssets] = useState([]);
+
+  React.useEffect(() => {
+    const fetchLivePipeline = async () => {
+      const { data, error } = await supabase.from('missouri_properties').select('*');
+      if (error) console.error('>>> SUPABASE ERROR:', error);
+            if (data) {
+        // NORMALIZATION INTERCEPTOR: Translating DB columns to UI visual props
+        const normalizedData = data.map(item => ({
+          ...item,
+          name: item.address || 'Unknown Address',
+          title: item.address,
+          location: item.county || 'St. Louis City',
+          price: item.arv > 0 ? '$' + item.arv.toLocaleString() : 'Calculate ARV',
+          statusBadge: item.deal_status || item.status || 'UNASSIGNED',
+          image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' // Fills the image block until we attach street view
+        }));
+        setAssets(normalizedData);
+      }
+    };
+    fetchLivePipeline();
+  }, []);
   const [toasts, setToasts] = useState([])
 
   // Ghost-piped fetch: tries localhost:8000 then simulates on catch
@@ -1154,6 +1186,22 @@ const ApexTerminal = () => {
   }
   const closeToast = (id) => setToasts(t => t.filter(x => x.id !== id))
 
+    if (authLoading) {
+    return <div className="h-screen w-screen flex items-center justify-center bg-[#050505] text-cyan-500 font-mono text-sm tracking-widest">/// INITIALIZING SECURE UPLINK...</div>;
+  }
+
+  // DEV BACKDOOR: CTO Override for local engineering
+  if (!session && process.env.NODE_ENV !== 'development') {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#050505]">
+        <h1 className="text-3xl font-bold text-white mb-2 tracking-widest">APEX TERMINAL</h1>
+        <p className="text-gray-500 font-mono text-xs mb-8">UNAUTHORIZED ACCESS DETECTED</p>
+        <button onClick={() => window.location.href = '/login'} className="px-8 py-3 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 font-mono text-xs tracking-[0.2em] hover:bg-cyan-500/20 rounded shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+          AUTHENTICATE SESSION
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-[#050505] text-gray-100 antialiased selection:bg-cyan-400/30 selection:text-white">
       {/* Ambient grid */}
@@ -1178,3 +1226,14 @@ const ApexTerminal = () => {
 }
 
 export default ApexTerminal
+
+
+
+
+
+
+
+
+
+
+
