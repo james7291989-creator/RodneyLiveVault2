@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ContractSniper({ property }) {
@@ -20,7 +20,7 @@ export default function ContractSniper({ property }) {
       // Pointing directly to your live Render Python backend
       const API_URL = process.env.REACT_APP_API_URL || 'https://rodney-vault-api.onrender.com';
       
-      const response = await fetch(${API_URL}/api/contract/snipe, {
+      const response = await fetch(`${API_URL}/api/contract/snipe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,10 +41,10 @@ export default function ContractSniper({ property }) {
       }
 
       setStatus('CONFIRMED');
-      setLog([+] PAYLOAD DELIVERED. STATUS: );
+      setLog('[+] PAYLOAD DELIVERED. STATUS: ');
     } catch (err) {
       setStatus('ERROR');
-      setLog([-] EXECUTION FAILED: );
+      setLog('[-] EXECUTION FAILED: ');
     }
   };
 
@@ -83,7 +83,7 @@ export default function ContractSniper({ property }) {
       </button>
 
       {log && (
-        <div className={mt-4 p-3 rounded text-xs font-mono border relative z-10 }>
+        <div className="mt-4 p-3 rounded text-xs font-mono border relative z-10">
           {log}
         </div>
       )}

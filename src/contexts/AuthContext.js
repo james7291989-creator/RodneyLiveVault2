@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 
 const AuthContext = createContext({});
@@ -28,13 +28,18 @@ export const AuthProvider = ({ children }) => {
 
   // 3. Enterprise Google OAuth Handshake Initiation
   const signInWithGoogle = async () => {
+    setLoading(true); // Prevent race condition by forcing loading state on sign in trigger
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin // Dynamic routing to current environment
+        redirectTo: window.location.origin + '/dashboard', // Explicit redirect targeting dashboard route directly
+        queryParams: { prompt: 'select_account' } // Forces Google account selection every time
       }
     });
-    if (error) console.error("OAUTH HANDSHAKE FAILED:", error.message);
+    if (error) {
+      console.error("OAUTH HANDSHAKE FAILED:", error.message);
+      setLoading(false);
+    }
   };
 
   const signOut = async () => {
@@ -52,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

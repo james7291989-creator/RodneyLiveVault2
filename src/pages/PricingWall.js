@@ -3,11 +3,11 @@ import { ShieldCheck, Target, Layers, Star, Crown, Diamond, Check, Zap } from 'l
 import { useAuth } from '../contexts/AuthContext';
 
 const STRIPE_LINKS = {
-  BRONZE: "https://buy.stripe.com/3cI14mb7q2ZS0Yn2LZ2Ji05",
-  SILVER: "https://buy.stripe.com/7sYbJ02AU43WfTh0DR2Ji06",
-  GOLD: "https://buy.stripe.com/test_6oUaEW6Ra8kc7mL72f2Ji00",
-  PLATINUM: "https://buy.stripe.com/3cI8wO3EYfMEayXeuH2Ji08",
-  CRYSTAL_DIAMOND: "https://buy.stripe.com/7sY00i0sM1VO7mLcmz2Ji09"
+  BRONZE: "https://buy.stripe.com/test_00wdR9aPJ1at02T6Ud5J600",
+  SILVER: "https://buy.stripe.com/test_00wdR9aPJ1at02T6Ud5J600",
+  GOLD: "https://buy.stripe.com/test_00wdR9aPJ1at02T6Ud5J600",
+  PLATINUM: "https://buy.stripe.com/test_00wdR9aPJ1at02T6Ud5J600",
+  CRYSTAL_DIAMOND: "https://buy.stripe.com/test_00wdR9aPJ1at02T6Ud5J600"
 };
 
 const TIERS = [

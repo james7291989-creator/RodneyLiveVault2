@@ -53,84 +53,48 @@ const STATUS_BORDER = {
   'In Escrow':'border-t-amber-500/60','Closed':'border-t-emerald-500/60',
 }
 
-// ============================================================================
-//  SEED DATA  ::  ST. LOUIS METRO PORTFOLIO
-// ============================================================================
-const SEED_ASSETS = [
-  { id:'AV-00412', address:'4321 Delmar Blvd',     city:'St. Louis, MO 63108', status:'Underwriting',  arv:215000, rehab:42000, mao:108500, taxDelq:true,  taxYears:3, owner:'Silver Crescent Holdings LLC', entityType:'LLC',        heat:84, lat:38.655, lng:-90.260 },
-  { id:'AV-00413', address:'2287 Cherokee St',     city:'St. Louis, MO 63118', status:'Raw Lead',      arv:142000, rehab:28500, mao:70900,  taxDelq:false, owner:'Margaret R. Holloway',            entityType:'Individual', heat:58, lat:38.598, lng:-90.219 },
-  { id:'AV-00414', address:'5901 Page Ave',        city:'St. Louis, MO 63112', status:'Contract Sent', arv:178500, rehab:51000, mao:73950,  taxDelq:true,  taxYears:2, owner:'Northgate Capital Trust',         entityType:'LLC',        heat:71, lat:38.668, lng:-90.281 },
-  { id:'AV-00415', address:'1140 N Kingshighway',  city:'St. Louis, MO 63113', status:'In Escrow',     arv:312000, rehab:68000, mao:150400, taxDelq:false, owner:'BlackOak Realty Group LLC',       entityType:'LLC',        heat:92, lat:38.652, lng:-90.265 },
-  { id:'AV-00416', address:'3719 S Grand Blvd',    city:'St. Louis, MO 63118', status:'Underwriting',  arv:198750, rehab:36200, mao:102975, taxDelq:false, owner:'Daniel J. Cordero',               entityType:'Individual', heat:66, lat:38.601, lng:-90.244 },
-  { id:'AV-00417', address:'6650 Gravois Ave',     city:'St. Louis, MO 63116', status:'Raw Lead',      arv:128400, rehab:31250, mao:58630,  taxDelq:true,  taxYears:1, owner:'Riverbend Asset Co. LLC',         entityType:'LLC',        heat:47, lat:38.572, lng:-90.272 },
-  { id:'AV-00418', address:'2102 Lafayette Ave',   city:'St. Louis, MO 63104', status:'Closed',        arv:425000, rehab:82000, mao:215000, taxDelq:false, owner:'Ironwood Equity Partners LLC',    entityType:'LLC',        heat:97, lat:38.615, lng:-90.211 },
-  { id:'AV-00419', address:'4015 Forest Park Ave', city:'St. Louis, MO 63108', status:'Contract Sent', arv:267000, rehab:47500, mao:139300, taxDelq:true,  taxYears:4, owner:'Estate of H. Whitaker',           entityType:'Individual', heat:88, lat:38.638, lng:-90.248 },
-  { id:'AV-00420', address:'8821 Riverview Dr',    city:'St. Louis, MO 63137', status:'Underwriting',  arv:156800, rehab:39400, mao:76160,  taxDelq:false, owner:'Apex Vault Industries LLC',       entityType:'LLC',        heat:62, lat:38.741, lng:-90.190 },
-  { id:'AV-00421', address:'7344 Manchester Rd',   city:'Maplewood, MO 63143', status:'In Escrow',     arv:289500, rehab:54750, mao:147600, taxDelq:false, owner:'Crown Meridian Trust',            entityType:'LLC',        heat:90, lat:38.612, lng:-90.327 },
-]
 
 const WEEKLY_FLOW = [
-  { d:'MON', leads:14, contracts:3, closed:1 },
-  { d:'TUE', leads:22, contracts:5, closed:2 },
-  { d:'WED', leads:18, contracts:4, closed:1 },
-  { d:'THU', leads:29, contracts:7, closed:3 },
-  { d:'FRI', leads:34, contracts:9, closed:4 },
-  { d:'SAT', leads:11, contracts:2, closed:1 },
-  { d:'SUN', leads:8,  contracts:1, closed:0 },
+  { d:'MON', leads:0, contracts:0, closed:0 },
+  { d:'TUE', leads:0, contracts:0, closed:0 },
+  { d:'WED', leads:0, contracts:0, closed:0 },
+  { d:'THU', leads:0, contracts:0, closed:0 },
+  { d:'FRI', leads:0, contracts:0, closed:0 },
+  { d:'SAT', leads:0, contracts:0, closed:0 },
+  { d:'SUN', leads:0, contracts:0, closed:0 },
 ]
 
-const SKIP_TRACE = {
-  'Silver Crescent Holdings LLC': {
-    type:'LLC · MO Domestic', formed:'03/14/2019', registeredAgent:'Marcus T. Beale',
-    principal:'Devon R. Marsh', address:'4710 Lindell Blvd Ste 200, St. Louis, MO 63108',
-    phones:['+1 (314) 555-0142', '+1 (314) 555-0177'], emails:['d.marsh@silvercrescent.io'],
-    relatedEntities:['Crescent Equity Partners LLC','Marsh Holdings Trust'], confidence:96,
-  },
-  'Northgate Capital Trust': {
-    type:'Statutory Trust · MO', formed:'07/02/2014', registeredAgent:'Lillian Vasquez',
-    principal:'Roland K. Northgate', address:'3201 Olive St, St. Louis, MO 63103',
-    phones:['+1 (314) 555-0211'], emails:['rkn@northgatecap.com','admin@northgatecap.com'],
-    relatedEntities:['NG Realty Holdings I LLC','NG Realty Holdings II LLC'], confidence:91,
-  },
-  'BlackOak Realty Group LLC': {
-    type:'LLC · MO Domestic', formed:'11/29/2021', registeredAgent:'Hampton & Cole PC',
-    principal:'Anita J. Sterling', address:'4144 Lindell Blvd, St. Louis, MO 63108',
-    phones:['+1 (314) 555-0388','+1 (618) 555-0140'], emails:['a.sterling@blackoakrg.com'],
-    relatedEntities:['BlackOak Capital I LLC','Sterling Family Trust'], confidence:94,
-  },
-}
+const SKIP_TRACE = {}
 
 const DEFAULT_TRACE = (name, address) => ({
   type:'Natural Person', formed:'—', registeredAgent:'—',
   principal:name, address:address || 'Unknown — last seen public record',
-  phones:['+1 (314) 555-' + (1000+Math.floor(Math.random()*8999))],
-  emails:[name.toLowerCase().replace(/[^a-z]/g,'.') + '@protonmail.com'],
+  phones: ["/// COMING SOON ///"],
+  emails: ["/// COMING SOON ///"],
   relatedEntities:[], confidence:72 + Math.floor(Math.random()*18),
 })
 
-const AI_READOUT_LINES = (asset) => [
-  { t:120,  s:'> SV-1500 CORE :: Engaged.' },
-  { t:140,  s:'> Loading parcel ' + asset.id + ' (' + asset.address + ')' },
-  { t:160,  s:'> Cross-referencing MLS comps within 0.5mi radius...' },
-  { t:200,  s:'  [✓] 14 active comps · 9 closed (T-90d)' },
-  { t:160,  s:'> Pulling satellite imagery + tax assessor footprint...' },
-  { t:180,  s:'  [✓] 1,840 sqft · 3BR/2BA · brick · 1928 vintage' },
-  { t:220,  s:'> Analyzing structural integrity vectors...' },
-  { t:160,  s:'  • Foundation:   GRADE B+   est. $3,200' },
-  { t:140,  s:'  • Roof:         GRADE C    est. $12,400' },
-  { t:140,  s:'  • HVAC:         GRADE C-   est. $8,100' },
-  { t:140,  s:'  • Electrical:   GRADE B    est. $4,600' },
-  { t:140,  s:'  • Plumbing:     GRADE C+   est. $5,900' },
-  { t:140,  s:'  • Cosmetic:     GRADE D    est. $7,800' },
-  { t:200,  s:'> SUMMING LINE ITEMS...' },
-  { t:220,  s:'  [✓] Rehab Total: ' + fmt(asset.rehab) },
-  { t:180,  s:'> Confidence interval: 94.2%' },
-  { t:200,  s:'> Computing MAO @ 70% ARV - rehab...' },
-  { t:240,  s:'  [✓] SV-1500 ARV:  ' + fmt(asset.arv) },
-  { t:140,  s:'  [✓] Max Offer:    ' + fmt(asset.mao) },
-  { t:280,  s:'> DEAL HEAT SCORE: ' + asset.heat + '/100  ::  ' + (asset.heat>=80?'STRIKE':asset.heat>=60?'WARM':'COLD') },
-  { t:240,  s:'> Underwriting complete. Awaiting CEO authorization.' },
-]
+
+// ============================================================================
+//  BUY BOX SETTINGS MODAL (Hoisted - Outside Components)
+// ============================================================================
+function BuyBoxSettingsModal({ onClose, toast }) {
+  const [saving, React_setSaving] = React.useState(false);
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-md border border-cyan-500/30 bg-[#070707] p-6">
+        <h2 className="font-mono text-lg font-bold text-gray-100 mb-6">AUTONOMOUS <span className="text-cyan-400">BUY BOX</span></h2>
+        <div className="flex justify-end gap-3 border-t border-gray-800 pt-4">
+          <button onClick={onClose} className="px-4 py-2 font-mono text-xs tracking-wider text-gray-500 hover:text-white">CANCEL</button>
+          <button onClick={() => { React_setSaving(true); setTimeout(() => { toast('SNIPER ARMED', 'Engine engaged.'); onClose(); }, 1000); }} className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/50 px-5 py-2 font-mono text-xs font-bold tracking-[0.1em]">
+            {saving ? "UPDATING..." : "ENGAGE SNIPER"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 // ============================================================================
 //  TOAST SYSTEM (lightweight)
@@ -147,7 +111,7 @@ const ToastStack = ({ toasts, onClose }) => (
         <button onClick={()=>onClose(t.id)} className="text-gray-500 hover:text-gray-200"><X className="h-3.5 w-3.5"/></button>
       </div>
     ))}
-    <style jsx>{`
+    <style jsx="true">{`
       @keyframes slideIn { from { transform: translateX(20px); opacity: 0 } to { transform: translateX(0); opacity: 1 } }
     `}</style>
   </div>
@@ -234,9 +198,9 @@ const Sidebar = ({ active, onNav, assets }) => {
               <div className="truncate font-mono text-[10px] tracking-wider text-amber-400">GOD MODE ACTIVE</div>
             </div>
           </div>
-          <button className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs font-medium tracking-wide text-red-400 transition-all hover:bg-red-500/10 hover:text-red-300">
-            <LogOut className="h-3.5 w-3.5"/>TERMINATE SESSION
-          </button>
+          <button onClick={async () => { try { await supabase.auth.signOut(); localStorage.clear(); } catch(e) {} window.location.reload(); }} className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs font-medium tracking-wide text-red-400 transition-all hover:bg-red-500/10 hover:text-red-300">
+              <LogOut className="h-3.5 w-3.5"/>TERMINATE SESSION
+            </button>
         </div>
       </div>
     </aside>
@@ -289,6 +253,46 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
 // ============================================================================
 //  UNMASK LLC MODAL
 // ============================================================================
+  // AUTO-ROUTING ENGINE INJECTED
+  const handleSV1500Scan = async (asset, setAssets, toast) => {
+    try {
+      toast(`>>> INITIATING SV-1500 UPLINK: ${asset.address}...`);
+      const aiResponse = await fetch((process.env.REACT_APP_API_URL || "http://localhost:5000") + "/api/v1/analyze/quantum", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer LOCAL_TESTING" },
+        body: JSON.stringify({ address: asset.address })
+      });
+      const aiData = await aiResponse.json();
+      
+      if (aiResponse.ok) {
+        setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, status: 'Underwriting', arv: aiData.estimated_arv, mao: aiData.mao } : a));
+        toast(`[SV-1500 SUCCESS] MAO Calculated: ${aiData.mao.toLocaleString()}. Routed to Underwriting.`);
+      } else { toast(`[SV-1500 WARN] ${aiData.error}`); }
+    } catch (e) { toast("[SV-1500 ERROR] Python Engine Offline."); }
+  };
+
+  const handleContractForge = async (asset, setAssets, toast) => {
+    try {
+      toast(`>>> FORGING ENVELOPE: ${asset.address}...`);
+      const forgeResponse = await fetch((process.env.REACT_APP_API_URL || "http://localhost:5000") + "/api/fire_contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer LOCAL_TESTING" },
+        body: JSON.stringify({ 
+           address: asset.address, 
+           agent_name: asset.owner || "CURRENT OWNER", 
+           mailing_address: asset.address, 
+           mao: asset.mao || 0 
+        })
+      });
+      const forgeData = await forgeResponse.json();
+      
+      if (forgeResponse.ok) {
+        setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, status: 'Contract Sent' } : a));
+        toast(`[CONTRACT ARMED] Payload Generated. Routed to Contract Sent.`);
+      } else { toast(`[FORGE WARN] ${forgeData.error}`); }
+    } catch (e) { toast("[FORGE ERROR] Python Engine Offline."); }
+  };
+
 const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
   const [loading, setLoading] = useState(true)
   const [trace, setTrace] = useState(null)
@@ -296,8 +300,8 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
   useEffect(() => {
     let alive = true
     ;(async () => {
-      const data = await ghostFetch('/api/skiptrace', { entity: asset.owner }, () =>
-        SKIP_TRACE[asset.owner] || DEFAULT_TRACE(asset.owner, asset.address)
+      const data = await ghostFetch('/api/skiptrace', { entity: asset?.owner || "UNKNOWN ENTITY" }, () =>
+        SKIP_TRACE[asset?.owner || "UNKNOWN ENTITY"] || DEFAULT_TRACE(asset?.owner || "UNKNOWN ENTITY", asset?.address || "MANUAL INTAKE")
       )
       // mandatory 1.5s reveal
       setTimeout(() => { if (alive) { setTrace(data); setLoading(false) } }, 1500)
@@ -349,7 +353,7 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
             </div>
 
             <div className="mt-3">
-              <SubscriptionGate requiredTier="SYNDICATE" currentTier={assets[0]?.user_tier || "SCOUT"}>
+              <SubscriptionGate requiredTier="SYNDICATE" currentTier={"SYNDICATE"}>
                 <div className="grid grid-cols-2 gap-3">
               <div className="rounded-md border border-gray-800 bg-[#0C0C0C] p-3">
                 <div className="font-mono text-[10px] tracking-[0.22em] text-gray-500">PHONES</div>
@@ -384,7 +388,7 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
           </div>
         )}
       </div>
-      <style jsx>{`@keyframes fadeIn { from{opacity:0} to{opacity:1} }`}</style>
+      <style jsx="true">{`@keyframes fadeIn { from{opacity:0} to{opacity:1} }`}</style>
     </div>
   )
 }
@@ -406,10 +410,11 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
   const [scanning, setScanning] = useState(false)
   const [pin, setPin] = useState(null)
   const [unmaskTarget, setUnmaskTarget] = useState(null)
+  const [buyBoxOpen, setBuyBoxOpen] = useState(false)
 
   const filtered = assets.filter(a => {
-    const q = query.trim().toLowerCase()
-    const okQ = !q || a.address.toLowerCase().includes(q) || a.owner.toLowerCase().includes(q) || a.id.toLowerCase().includes(q)
+    const q = query.trim()?.toLowerCase()
+    const okQ = !q || a.address?.toLowerCase().includes(q) || a.owner?.toLowerCase().includes(q) || a.id?.toLowerCase().includes(q)
     const okS = statusFilter==='All Statuses' || a.status===statusFilter
     return okQ && okS
   })
@@ -481,7 +486,14 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
             <MiniStat label="CAPITAL CAP"      value={fmtCompact(totals.mao)}/>
             <MiniStat label="DELQ TARGETS"     value={String(totals.delq).padStart(2,'0')} accent="text-red-400"/>
           </div>
-          <style jsx>{`@keyframes shimmer{100%{transform:translateX(100%)}}`}</style>
+          <div className="mt-4 pt-4 border-t border-gray-800 font-mono text-[10px] tracking-[0.25em] text-gray-500">
+            /// AUTOMATION COMMANDS
+          </div>
+          <button onClick={()=>setBuyBoxOpen(o=>!o)} className="mt-2 flex h-9 items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 font-mono text-xs font-bold tracking-[0.1em] text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_18px_-4px_rgba(0,229,255,0.7)]">
+            <span className={buyBoxOpen?'text-amber-400':'text-cyan-400'}>{buyBoxOpen?'⚠':'⚡'}</span>
+            {buyBoxOpen?'DE-ENGAGE SNIPER':'ENGAGE SNIPER'}
+          </button>
+          <style jsx="true">{`@keyframes shimmer{100%{transform:translateX(100%)}}`}</style>
         </div>
 
         {/* SATELLITE UPLINK HUD */}
@@ -579,8 +591,8 @@ const AssetRow = ({ asset, onUnmask, toast }) => {
       </div>
       <div className="pointer-events-none col-span-8 -mt-1 flex justify-end gap-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
         <QuickBtn icon={Eye}      label="UNMASK LLC"        onClick={onUnmask}/>
-        <QuickBtn icon={Zap}      label="ENGAGE SV-1500"    onClick={()=>toast('SV-1500 ENGAGED', asset.address)}/>
-        <QuickBtn icon={FileText} label="GENERATE CONTRACT" onClick={()=>toast('CONTRACT QUEUED', asset.id)}/>
+        <QuickBtn icon={Zap} label="ENGAGE SV-1500" onClick={()=>{handleSV1500Scan(asset, setAssets, toast)}}/>
+        <QuickBtn icon={FileText} label="GENERATE CONTRACT" onClick={()=>{handleContractForge(asset, setAssets, toast)}}/>
       </div>
     </div>
   )
@@ -780,7 +792,7 @@ const SV1500View = ({ assets, ghostFetch, toast }) => {
               </>
             )}
           </div>
-          <style jsx>{`@keyframes type{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:translateX(0)}}`}</style>
+          <style jsx="true">{`@keyframes type{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:translateX(0)}}`}</style>
         </div>
       </div>
     </div>
@@ -795,6 +807,30 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
   const [selected, setSelected] = useState(pool[0] || null)
   const [loading, setLoading] = useState(false)
   const [doc, setDoc] = useState(null)
+
+  const exportPDF = async () => {
+    if (!doc) return;
+    toast("FORGING PDF", "Initializing jsPDF engine...");
+    try {
+      const { jsPDF } = await import("jspdf");
+      const pdf = new jsPDF("p", "pt", "letter");
+      pdf.setFont("times", "bold");
+      pdf.setFontSize(14);
+      pdf.text("ASSIGNMENT OF REAL ESTATE PURCHASE CONTRACT", 300, 60, { align: "center" });
+      pdf.setFont("times", "normal");
+      pdf.setFontSize(12);
+      pdf.text(`Effective Date: ${doc.date}`, 50, 100);
+      pdf.text(`Assignor: ${doc.buyer}`, 50, 120);
+      pdf.text(`Assignee: ${doc.assignee}`, 50, 140);
+      pdf.text(`Property: ${doc.property}`, 50, 160);
+      pdf.text(`Purchase Price: $${Number(doc.purchase).toLocaleString()}`, 50, 180);
+      pdf.text(`Assignment Fee: $${Number(doc.assignmentFee).toLocaleString()}`, 50, 200);
+      pdf.save(doc.number + ".pdf");
+      toast("PDF SECURED", "Contract downloaded to your machine.");
+    } catch(e) {
+      toast("SYSTEM ERROR", "Failed to initialize PDF engine.");
+    }
+  };
 
   useEffect(() => {
     if (!selected) return
@@ -857,11 +893,11 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
               {doc ? doc.number+'.pdf' : 'DRAFTING...'}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={()=>doc && toast('CONTRACT EXPORTED', doc.number)} className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-800 px-2.5 font-mono text-[10px] tracking-[0.15em] text-gray-300 hover:border-cyan-500/40 hover:text-cyan-300">
-                <Download className="h-3 w-3"/>EXPORT
+              <button onClick={()=>exportPDF()} disabled={!doc} className="inline-flex h-7 items-center gap-1.5 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-3 font-mono text-[10px] font-bold tracking-[0.15em] text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                <Printer className="h-3 w-3"/>EXPORT PDF
               </button>
-              <button onClick={()=>doc && toast('NOTARY DISPATCHED', doc.number)} className="inline-flex h-7 items-center gap-1.5 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-2.5 font-mono text-[10px] font-semibold tracking-[0.15em] text-cyan-300 hover:bg-cyan-500/20">
-                <Printer className="h-3 w-3"/>SEND TO NOTARY
+              <button onClick={()=>toast('NOTARY DISPATCHED', doc.number)} className="inline-flex h-7 items-center gap-1.5 rounded-md border border-gray-800 bg-[#0C0C0C] px-3 font-mono text-[10px] tracking-[0.15em] text-gray-300 hover:border-cyan-500/40 hover:text-cyan-300">
+                <FileSignature className="h-3 w-3"/>NOTARY
               </button>
             </div>
           </div>
@@ -949,8 +985,8 @@ const Sealed = ({ label, value }) => (
 //  VIEW 5 :: WAR ROOM (Executive Dashboard)
 // ============================================================================
 const WarRoomView = ({ assets }) => {
-  const pipeline = assets.reduce((s,a)=>s+a.arv,0)
-  const deployed = assets.filter(a=>['In Escrow','Closed','Contract Sent'].includes(a.status)).reduce((s,a)=>s+a.mao,0)
+  const pipeline = assets.filter(a => a.status !== 'Closed').reduce((s,a)=>s+(a.arv||0),0)
+  const deployed = assets.filter(a=>['In Escrow','Closed','Contract Sent'].includes(a.status)).reduce((s,a)=>s+(a.mao||0),0)
   const escrows = assets.filter(a=>a.status==='In Escrow').length
   const closed = assets.filter(a=>a.status==='Closed').length
   const delq = assets.filter(a=>a.taxDelq).length
@@ -1145,10 +1181,16 @@ const ApexTerminal = () => {
 
   React.useEffect(() => {
     const fetchLivePipeline = async () => {
-      const { data, error } = await supabase.from('missouri_properties').select('*');
+      if (!session?.user?.id) return;
+      
+      const { data, error } = await supabase
+        .from('missouri_properties')
+        .select('*')
+        .eq('user_id', session.user.id); // Strict User Filtering Applied
+        
       if (error) console.error('>>> SUPABASE ERROR:', error);
-            if (data) {
-        // NORMALIZATION INTERCEPTOR: Translating DB columns to UI visual props
+      if (data) {
+        // WAR ROOM TELEMETRY: Normalize DB columns to UI props
         const normalizedData = data.map(item => ({
           ...item,
           name: item.address || 'Unknown Address',
@@ -1156,13 +1198,35 @@ const ApexTerminal = () => {
           location: item.county || 'St. Louis City',
           price: item.arv > 0 ? '$' + item.arv.toLocaleString() : 'Calculate ARV',
           statusBadge: item.deal_status || item.status || 'UNASSIGNED',
-          image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80' // Fills the image block until we attach street view
+          image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80',
+          heat: item.heat || 0,
+          taxDelq: item.tax_delq || false,
+          taxYears: item.tax_years || 0,
+          owner: item.owner_name || 'Pending SOS Lookup',
+          entityType: item.entity_type || 'LLC',
         }));
         setAssets(normalizedData);
       }
     };
     fetchLivePipeline();
-  }, []);
+    
+    // WAR ROOM TELEMETRY: Supabase Realtime Sync
+    supabase
+      .channel('realtime_vault')
+      .on(
+        'postgres_changes',
+        {
+          schema: 'public',
+          table: 'missouri_properties',
+          filter: `user_id=eq.${session.user.id}`
+        },
+        (payload) => {
+          console.log('SUPABASE SYNC', payload);
+          fetchLivePipeline();
+        }
+      )
+      .subscribe();
+  }, [session]);
   const [toasts, setToasts] = useState([])
 
   // Ghost-piped fetch: tries localhost:8000 then simulates on catch
@@ -1226,6 +1290,16 @@ const ApexTerminal = () => {
 }
 
 export default ApexTerminal
+
+
+
+
+
+
+
+
+
+
 
 
 
