@@ -1182,15 +1182,14 @@ const ApexTerminal = () => {
   React.useEffect(() => {
     const fetchLivePipeline = async () => {
       if (!session?.user?.id) return;
-      
+
       const { data, error } = await supabase
         .from('missouri_properties')
         .select('*')
-        .eq('user_id', session.user.id); // Strict User Filtering Applied
-        
+        .eq('user_id', session.user.id);
+
       if (error) console.error('>>> SUPABASE ERROR:', error);
       if (data) {
-        // WAR ROOM TELEMETRY: Normalize DB columns to UI props
         const normalizedData = data.map(item => ({
           ...item,
           name: item.address || 'Unknown Address',
@@ -1208,24 +1207,34 @@ const ApexTerminal = () => {
         setAssets(normalizedData);
       }
     };
+
     fetchLivePipeline();
-    
-    // WAR ROOM TELEMETRY: Supabase Realtime Sync
-    supabase
-      .channel('realtime_vault')
-      .on(
-        'postgres_changes',
-        {
-          schema: 'public',
-          table: 'missouri_properties',
-          filter: `user_id=eq.${session.user.id}`
-        },
-        (payload) => {
-          console.log('SUPABASE SYNC', payload);
-          fetchLivePipeline();
-        }
-      )
-      .subscribe();
+
+    // WAR ROOM TELEMETRY: Safely initialize only if user exists
+    let channel;
+    if (session?.user?.id) {
+      channel = supabase
+        .channel('realtime_vault')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'missouri_properties',
+            filter: `user_id=eq.${session.user.id}`
+          },
+          (payload) => {
+            console.log('SUPABASE SYNC', payload);
+            fetchLivePipeline();
+          }
+        )
+        .subscribe();
+    }
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [session]);
   const [toasts, setToasts] = useState([])
 
