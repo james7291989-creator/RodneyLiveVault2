@@ -82,7 +82,7 @@ function BuyBoxSettingsModal({ onClose, toast }) {
   const [saving, React_setSaving] = React.useState(false);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/80 backdrop-blur-2xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-md border border-cyan-500/30 bg-zinc-950 p-6">
         <h2 className="font-mono text-lg font-bold text-zinc-100 mb-6">AUTONOMOUS <span className="text-cyan-400">BUY BOX</span></h2>
         <div className="flex justify-end gap-3 border-t border-zinc-800 pt-4">
@@ -318,46 +318,6 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
     } catch (e) { toast("[FORGE ERROR] Python Engine Offline."); }
   };
 
-const NotesModal = ({ asset, onClose, toast, setAssets }) => {
-  const [noteText, setNoteText] = useState(asset.notes || '');
-  const [saving, setSaving] = useState(false);
-
-  const saveNote = async () => {
-    setSaving(true);
-    try {
-      const { error } = await supabase.from('missouri_properties').update({ notes: noteText }).eq('id', asset.id);
-      if (error) throw error;
-      setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, notes: noteText } : a));
-      toast('NOTES SECURED', 'Asset vault updated.');
-      onClose();
-    } catch (e) { 
-      toast('ERROR', 'Database sync failed.'); 
-    } finally { 
-      setSaving(false); 
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md p-6">
-      <div className="w-full max-w-lg rounded-2xl border border-cyan-500/30 bg-zinc-950 p-6 shadow-[0_0_40px_-10px_rgba(0,229,255,0.3)]">
-        <h3 className="font-mono text-cyan-400 font-bold mb-4 uppercase text-xs tracking-widest">/// ASSET DOSSIER: {asset.address}</h3>
-        <textarea 
-          className="w-full h-48 bg-zinc-900/50 border border-white/10 rounded-xl p-4 text-sm text-gray-200 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/40 custom-scrollbar resize-none" 
-          placeholder="Enter tactical notes, access codes, or owner details..." 
-          value={noteText} 
-          onChange={(e) => setNoteText(e.target.value)} 
-        />
-        <div className="flex justify-end gap-3 mt-4">
-          <button onClick={onClose} className="px-4 py-2 font-mono text-xs text-gray-400 hover:text-white">CANCEL</button>
-          <button onClick={saveNote} disabled={saving} className="bg-cyan-500/10 border border-cyan-500/50 text-cyan-300 px-6 py-2 rounded-lg font-mono text-xs font-bold hover:bg-cyan-500/20 hover:shadow-[0_0_15px_rgba(0,229,255,0.4)] transition-all tracking-widest">
-            {saving ? 'SYNCING...' : 'SAVE TO VAULT'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
   const [loading, setLoading] = useState(true)
   const [trace, setTrace] = useState(null)
@@ -377,7 +337,7 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
 
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-zinc-950/80 backdrop-blur-2xl p-6 animate-[fadeIn_.2s_ease]">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6 animate-[fadeIn_.2s_ease]">
       <div className="w-full max-w-2xl overflow-hidden rounded-md border border-cyan-500/30 bg-zinc-950 shadow-[0_0_60px_-10px_rgba(0,229,255,0.45)]">
         <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-5 py-3">
           <div className="flex items-center gap-2.5">
@@ -478,7 +438,6 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
   const [scanning, setScanning] = useState(false)
   const [pin, setPin] = useState(null)
   const [unmaskTarget, setUnmaskTarget] = useState(null);
-  const [notesTarget, setNotesTarget] = useState(null);
 
   // APEX OVERRIDE: TITANIUM VIEWPORT V2 (DOM LOCK)
   React.useEffect(() => {
@@ -672,12 +631,11 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
           {filtered.length===0 ? (
             <div className="px-6 py-16 text-center font-mono text-xs tracking-[0.25em] text-zinc-600">/// NO ACTIVE ASSETS DETECTED IN VAULT</div>
           ) : filtered.slice(0, 50).map(a => (
-            <AssetRow key={a.id} asset={a} onUnmask={()=>setUnmaskTarget(a)} toast={toast} setAssets={setAssets} engageSniper={engageSniper} setNotesTarget={setNotesTarget}/>
+            <AssetRow key={a.id} asset={a} onUnmask={()=>setUnmaskTarget(a)} toast={toast} setAssets={setAssets} engageSniper={engageSniper}/>
           ))}
         </div>
       </div>
 
-      {notesTarget && <NotesModal asset={notesTarget} onClose={()=>setNotesTarget(null)} toast={toast} setAssets={setAssets}/>}
       {unmaskTarget && <UnmaskModal asset={unmaskTarget} onClose={()=>setUnmaskTarget(null)} ghostFetch={ghostFetch}/>}
     </div>
   )
@@ -690,7 +648,7 @@ const MiniStat = ({ label, value, accent='text-white' }) => (
   </div>
 )
 
-const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTarget }) => {
+const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -727,7 +685,6 @@ const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTar
             <ActionItem icon={Zap}          label="ENGAGE SV-1500"    hint="AI line-item rehab"         onClick={()=>{setOpen(false);toast('SV-1500 ENGAGED','Underwriting '+asset.address)}}/>
             <ActionItem icon={FileText}     label="GENERATE CONTRACT" hint="Auto-draft assignment"      onClick={()=>{setOpen(false);toast('CONTRACT QUEUED','Drafting assignment for '+asset.id)}}/>
             <ActionItem icon={ArrowUpRight} label="PUSH TO LIVE BOARD" hint="Move to escrow kanban" onClick={()=>{setOpen(false);toast('PUSHED','Asset routed to Live Board')}}/>
-<ActionItem icon={FileText} label="ASSET NOTES" hint="View or edit tactical data" onClick={()=>{setOpen(false);setNotesTarget(asset)}}/>
 <ActionItem icon={X} label="PURGE ASSET" hint="Permanently delete from database" onClick={()=>{setOpen(false);engageSniper(asset.id, asset.address)}} last/>
           </div>
         )}
@@ -736,7 +693,6 @@ const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTar
         <QuickBtn icon={Eye}      label="UNMASK LLC"        onClick={onUnmask}/>
         <QuickBtn icon={Zap} label="ENGAGE SV-1500" onClick={()=>{handleSV1500Scan(asset, setAssets, toast)}}/>
         <QuickBtn icon={FileText} label="GENERATE CONTRACT" onClick={()=>{handleContractForge(asset, setAssets, toast)}}/>
-          <QuickBtn icon={FileText} label="NOTES" onClick={() => setNotesTarget(asset)}/>
           <QuickBtn icon={X} label="PURGE" onClick={() => engageSniper(asset.id, asset.address)}/>
       </div>
     </div>
@@ -979,54 +935,24 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
   const [loading, setLoading] = useState(false)
   const [doc, setDoc] = useState(null)
 
-    const exportPDF = async () => {
+  const exportPDF = async () => {
     if (!doc) return;
     toast("FORGING PDF", "Initializing jsPDF engine...");
     try {
       const { jsPDF } = await import("jspdf");
       const pdf = new jsPDF("p", "pt", "letter");
-      
-      pdf.setFont("times", "bold"); pdf.setFontSize(16);
-      pdf.text("ASSIGNMENT OF REAL ESTATE PURCHASE CONTRACT", 300, 80, { align: "center" });
-      
-      pdf.setFont("times", "normal"); pdf.setFontSize(12);
-      pdf.text(`Effective Date: ${doc.date}`, 50, 140);
-      
-      pdf.setFont("times", "bold"); pdf.text("SUBJECT PROPERTY:", 50, 180);
-      pdf.setFont("times", "normal"); pdf.text(doc.property, 220, 180);
-      
-      pdf.setFont("times", "bold"); pdf.text("ORIGINAL SELLER:", 50, 210);
-      pdf.setFont("times", "normal"); pdf.text(doc.seller, 220, 210);
-      
-      pdf.setFont("times", "bold"); pdf.text("PURCHASE PRICE:", 50, 240);
-      pdf.setFont("times", "normal"); pdf.text(`${Number(doc.purchase).toLocaleString()}`, 220, 240);
-      
-      pdf.setFont("times", "bold"); pdf.text("ASSIGNMENT FEE:", 50, 270);
-      pdf.setFont("times", "normal"); pdf.text(`${Number(doc.assignmentFee).toLocaleString()}`, 220, 270);
-      
-      pdf.setFont("times", "bold"); pdf.text("ASSIGNEE:", 50, 300);
-      pdf.setFont("times", "normal"); pdf.text(doc.assignee, 220, 300);
-      
-      pdf.setFont("times", "normal");
-      pdf.text("1. Assignment. Assignor hereby irrevocably transfers, assigns, and conveys to Assignee", 50, 350);
-      pdf.text("all of Assignor's right, title, and interest in and to that certain Real Estate Purchase Contract.", 50, 370);
-      
-      pdf.text("2. Consideration. In consideration of this Assignment, Assignee shall pay to Assignor the", 50, 410);
-      pdf.text("Assignment Fee in immediately available funds at the closing of the underlying transaction.", 50, 430);
-      
-      pdf.text("3. Representations. Assignor represents that the Contract is in full force and effect.", 50, 470);
-      
       pdf.setFont("times", "bold");
-      pdf.text("ASSIGNOR", 100, 540); pdf.text("ASSIGNEE", 400, 540);
-      
+      pdf.setFontSize(14);
+      pdf.text("ASSIGNMENT OF REAL ESTATE PURCHASE CONTRACT", 300, 60, { align: "center" });
       pdf.setFont("times", "normal");
-      pdf.text("By: _________________________", 50, 580); pdf.text(`Name: ${doc.buyer}`, 50, 600);
-      pdf.text("By: _________________________", 350, 580); pdf.text(`Name: ${doc.assignee}`, 350, 600);
-      
-      pdf.setFontSize(8); pdf.setTextColor(150);
-      pdf.text(`AUTO-GENERATED BY SV-1500 CORE · NOTARY READY · ${doc.number}`, 300, 750, { align: "center" });
-      
-      pdf.save(`${doc.number}.pdf`);
+      pdf.setFontSize(12);
+      pdf.text(`Effective Date: ${doc.date}`, 50, 100);
+      pdf.text(`Assignor: ${doc.buyer}`, 50, 120);
+      pdf.text(`Assignee: ${doc.assignee}`, 50, 140);
+      pdf.text(`Property: ${doc.property}`, 50, 160);
+      pdf.text(`Purchase Price: $${Number(doc.purchase).toLocaleString()}`, 50, 180);
+      pdf.text(`Assignment Fee: $${Number(doc.assignmentFee).toLocaleString()}`, 50, 200);
+      pdf.save(doc.number + ".pdf");
       toast("PDF SECURED", "Contract downloaded to your machine.");
     } catch(e) {
       toast("SYSTEM ERROR", "Failed to initialize PDF engine.");
@@ -1516,7 +1442,6 @@ const ApexTerminal = () => {
 }
 
 export default ApexTerminal
-
 
 
 

@@ -146,7 +146,7 @@ const AIAssistant = () => {
                   ? 'bg-primary text-white font-medium rounded-[2rem] rounded-tr-sm' 
                   : 'bg-black/60 border border-white/10 text-zinc-100 rounded-[2rem] rounded-tl-sm backdrop-blur-md'
               }`}>
-                {msg.content.split('\n').map((line, i) => (
+                {msg.content?.split('\n').map((line, i) => (
                   <span key={i}>
                     {line.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}
                     <br/>
