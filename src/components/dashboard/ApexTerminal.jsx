@@ -1049,19 +1049,29 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
   const queue = useMemo(() => assets.filter(a => ['Raw Lead','Underwriting'].includes(a.status)), [assets])
   const [selected, setSelected] = useState(queue[0] || null)
   const [lines, setLines] = useState([])
+  const [chatInput, setChatInput] = useState('')
   const [running, setRunning] = useState(false)
   const timers = useRef([])
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
+      // APEX PHASE 4: INTERACTIVE TERMINAL CHAT — handler wiring (future API payload integration point)
+  const handleChatSubmit = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    setLines(prev => [...prev, `>>> [USER]: ${chatInput}`, `>>> [SV-1500]: Processing query...`]);
+    setChatInput('');
+    // Future API payload integration goes here
+  };
+
       const engage = async (asset) => {
       timers.current.forEach(clearTimeout); timers.current = [];
-      setSelected(asset); setLines(['>>> INITIATING QUANTUM UPLINK...']); setRunning(true);
+      setSelected(asset); setLines(['>>> INITIATING QUANTUM UPLINK...', '>>> [SYSTEM]: Neural Underwriter initialized. Strict Missouri real estate compliance enforced. Fraud detection active.', `>>> ANALYZING ASSET: ${asset.address}`]); setRunning(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const token = session ? session.access_token : 'DEV_OVERRIDE';
         setLines(prev => [...prev, '>>> NEGOTIATING SECURE HANDSHAKE...', '>>> ANALYZING ASSET: ' + asset.address]);
-        const response = await fetch('http://localhost:5000/api/v1/analyze/quantum', {
+        const response = await fetch((process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com') + '/api/v1/analyze/quantum', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1156,6 +1166,19 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
           </div>
           <style jsx="true">{`@keyframes type{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:translateX(0)}}`}</style>
         </div>
+
+        {/* APEX PHASE 4: INTERACTIVE TERMINAL CHAT */}
+        <form onSubmit={handleChatSubmit} className="mt-4 flex items-center gap-2">
+          <input
+            value={chatInput}
+            onChange={e => setChatInput(e.target.value)}
+            placeholder="Ask the neural underwriter..."
+            className="h-10 flex-1 rounded-md border border-cyan-500/30 bg-black px-4 font-mono text-sm text-cyan-200 placeholder:text-zinc-600 focus:border-cyan-400 focus:outline-none"
+          />
+          <button type="submit" className="flex h-10 items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 font-mono text-xs font-bold tracking-[0.1em] text-cyan-300 hover:bg-cyan-500/20">
+            <Zap className="h-3.5 w-3.5"/>TRANSMIT
+          </button>
+        </form>
       </div>
     </div>
   )
