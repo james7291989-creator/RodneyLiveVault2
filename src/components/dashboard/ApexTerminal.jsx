@@ -20,7 +20,7 @@ import {
   ArrowUpRight, Building2, Activity, Filter, MapPin, Loader2, X, CheckCircle2,
   TrendingUp, DollarSign, Flame, ArrowRight, Terminal, Brain, Gauge, Sparkles,
   Hammer, Wind, Wrench, ShieldQuestion, Printer, Download, Clock, BarChart3, Crown, StickyNote,
-, Printer } from 'lucide-react'
+} from 'lucide-react'
 
 // ============================================================================
 //  GLOBAL HELPERS
@@ -454,6 +454,40 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
   return () => { alive = false }
   }, [asset, ghostFetch])
 
+  // BROWSER SECURITY SANITIZATION :: strict DOM-based Blob download (no OS protocol handlers / native FS APIs)
+  const exportTelemetry = () => {
+    if (!trace) return;
+    const esc = (v) => {
+      const s = String(v ?? '').replace(/"/g, '""')
+      return /[",\n]/.test(s) ? `"${s}"` : s
+    }
+    const rows = [
+      ['FIELD', 'VALUE'],
+      ['TARGET ENTITY', asset?.owner || 'UNKNOWN ENTITY'],
+      ['ENTITY TYPE', trace.type || ''],
+      ['CONFIDENCE', trace.confidence || ''],
+      ['REGISTERED AGENT', trace.registeredAgent || ''],
+      ['DATE FORMED', trace.formed || ''],
+      ['BENEFICIAL OWNER', trace.principal || ''],
+      ['MAILING ADDRESS', trace.address || ''],
+      ['PHONES', (trace.phones || []).join(' | ')],
+      ['EMAILS', (trace.emails || []).join(' | ')],
+      ['RELATED ENTITIES', (trace.relatedEntities || []).join(' | ')],
+      ['PROPERTY ID', asset?.id || ''],
+      ['PROPERTY ADDRESS', asset?.address || ''],
+    ]
+    const csvContent = rows.map(r => r.map(esc).join(',')).join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${asset?.id || 'asset'}_unmask_telemetry.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-zinc-950/80 backdrop-blur-2xl p-6 animate-[fadeIn_.2s_ease]">
@@ -527,7 +561,7 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
 
             <div className="mt-5 flex justify-end gap-2">
               <button onClick={onClose} className="rounded-md border border-zinc-800 bg-zinc-900/70 px-4 py-2 font-mono text-xs tracking-[0.15em] text-zinc-300 hover:border-zinc-700 hover:text-zinc-100">CLOSE</button>
-              <button className="inline-flex items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 font-mono text-xs font-semibold tracking-[0.15em] text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_18px_-4px_rgba(0,229,255,0.7)]">
+              <button onClick={exportTelemetry} className="inline-flex items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 font-mono text-xs font-semibold tracking-[0.15em] text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_18px_-4px_rgba(0,229,255,0.7)]">
                 <Download className="h-3.5 w-3.5"/>EXPORT DOSSIER
               </button>
             </div>
