@@ -633,8 +633,6 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSele
     window.addEventListener('mousedown', handleForceClose);
     return () => window.removeEventListener('mousedown', handleForceClose);
   }, [unmaskTarget]);
-  const [buyBoxOpen, setBuyBoxOpen] = useState(false)
-
   const filtered = assets.filter(a => {
     const q = query.trim()?.toLowerCase()
     const okQ = !q || a.address?.toLowerCase().includes(q) || a.owner?.toLowerCase().includes(q) || a.id?.toLowerCase().includes(q)
@@ -692,6 +690,39 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSele
     }
   }
 
+  // APEX PHASE 3: AUTONOMOUS DEAL INJECTION — Global Engage Sniper
+  const fireSniperInjection = async () => {
+    setScanning(true);
+    try {
+      // 1. Query the global off-market pool (locked to Raw Lead)
+      const { data: leads, error: fetchErr } = await supabase.from('missouri_properties').select('*').eq('status', 'Raw Lead').limit(3);
+
+      // 2. Error handling — dry pool means the Sniper stays offline
+      if (fetchErr) throw fetchErr;
+      if (!leads || leads.length === 0) {
+        toast('SNIPER OFFLINE', 'Zero off-market assets available in global pool.');
+        return;
+      }
+
+      // 3. Mutate Database — lock the leads so no other user can pull the same Raw Leads
+      const leadIds = leads.map(l => l.id);
+      const { error: updateErr } = await supabase.from('missouri_properties').update({ status: 'Underwriting' }).in('id', leadIds);
+      if (updateErr) throw updateErr;
+
+      // 4. Mutate UI State — flip status locally and inject to the top of the vault
+      const updatedLeads = leads.map(l => ({ ...l, status: 'Underwriting' }));
+      setAssets(prev => [...updatedLeads, ...prev]);
+
+      // 5. Success toast
+      toast('SNIPER ENGAGED', 'Injected ' + leads.length + ' assets into your vault.');
+    } catch (error) {
+      console.error('SNIPER INJECTION FAILURE:', error);
+      toast('SNIPER ERROR', 'Could not inject assets from the global pool.');
+    } finally {
+      setScanning(false);
+    }
+  };
+
   // APEX OVERRIDE: SECURE PIPELINE MATH
   const engageSniper = async (assetId, address) => { if (!window.confirm('WARNING: Permanently delete ' + address + ' from the database?')) return; try { if (typeof toast === 'function') toast('SNIPER ENGAGED', 'Purging ' + address + '...'); const { error } = await supabase.from('missouri_properties').delete().eq('id', assetId); if (error) throw error; setAssets(prev => prev.filter(a => a.id !== assetId)); if (typeof toast === 'function') toast('ASSET PURGED', address + ' eradicated.'); } catch(e) { console.error('PURGE ERROR:', e); } };
   const totals = React.useMemo(() => ({
@@ -744,9 +775,9 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSele
           <div className="mt-4 pt-4 border-t border-zinc-800 font-mono text-[10px] tracking-[0.25em] text-zinc-500">
             /// AUTOMATION COMMANDS
           </div>
-          <button onClick={()=>setBuyBoxOpen(o=>!o)} className="mt-2 flex h-9 items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 font-mono text-xs font-bold tracking-[0.1em] text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_18px_-4px_rgba(0,229,255,0.7)]">
-            <span className={buyBoxOpen?'text-amber-400':'text-cyan-400'}>{buyBoxOpen?'⚠':'⚡'}</span>
-            {buyBoxOpen?'DE-ENGAGE SNIPER':'ENGAGE SNIPER'}
+          <button onClick={fireSniperInjection} disabled={scanning} className="mt-2 flex h-9 items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 font-mono text-xs font-bold tracking-[0.1em] text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_18px_-4px_rgba(0,229,255,0.7)] disabled:opacity-50 disabled:cursor-not-allowed">
+            <span className="text-cyan-400">⚡</span>
+            {scanning ? <><Loader2 className="h-3.5 w-3.5 animate-spin"/>ACQUIRING...</> : 'ENGAGE SNIPER'}
           </button>
           <style jsx="true">{`@keyframes shimmer{100%{transform:translateX(100%)}}`}</style>
         </div>
