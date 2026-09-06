@@ -1055,13 +1055,26 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
-      // APEX PHASE 4: INTERACTIVE TERMINAL CHAT — handler wiring (future API payload integration point)
-  const handleChatSubmit = (e) => {
+      // APEX PHASE 5: LIVE AI CHAT PAYLOAD — Render Edge `/api/v1/analyze/chat` uplink
+  const handleChatSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
-    setLines(prev => [...prev, `>>> [USER]: ${chatInput}`, `>>> [SV-1500]: Processing query...`]);
+    const query = chatInput;
+    setLines(prev => [...prev, `>>> [USER]: ${query}`, `>>> [SV-1500]: Processing query...`]);
     setChatInput('');
-    // Future API payload integration goes here
+
+    try {
+      const response = await fetch((process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com') + '/api/v1/analyze/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId: selected?.id, address: selected?.address, query: query })
+      });
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      setLines(prev => [...prev, `>>> [SV-1500]: ${data.reply || data.message || 'Analysis complete.'}`]);
+    } catch (err) {
+      setLines(prev => [...prev, `>>> [SV-1500 ERROR]: Render Edge API unreachable for chat payload.`]);
+    }
   };
 
       const engage = async (asset) => {
