@@ -14,13 +14,13 @@ import { supabase } from '../../supabaseClient';
  * ============================================================================= */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import {
+import { 
   Crosshair, LayoutDashboard, Vault, Trello, FileSignature, Cpu, Settings, LogOut,
   Search, ChevronDown, MoreHorizontal, ShieldAlert, ShieldCheck, Eye, Zap, FileText,
   ArrowUpRight, Building2, Activity, Filter, MapPin, Loader2, X, CheckCircle2,
   TrendingUp, DollarSign, Flame, ArrowRight, Terminal, Brain, Gauge, Sparkles,
   Hammer, Wind, Wrench, ShieldQuestion, Printer, Download, Clock, BarChart3, Crown, StickyNote,
-} from 'lucide-react'
+, Printer } from 'lucide-react'
 
 // ============================================================================
 //  GLOBAL HELPERS
