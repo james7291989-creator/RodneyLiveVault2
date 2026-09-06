@@ -548,7 +548,7 @@ const Field = ({ label, value, accent }) => (
 // ============================================================================
 //  VIEW 1 :: ASSET VAULT
 // ============================================================================
-const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
+const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSelectedAsset }) => {
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('All Statuses')
@@ -754,7 +754,7 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
           {filtered.length===0 ? (
             <div className="px-6 py-16 text-center font-mono text-xs tracking-[0.25em] text-zinc-600">/// NO ACTIVE ASSETS DETECTED IN VAULT</div>
           ) : filtered.slice(0, 50).map(a => (
-            <AssetRow key={a.id} asset={a} onUnmask={()=>setUnmaskTarget(a)} toast={toast} setAssets={setAssets} engageSniper={engageSniper} setNotesTarget={setNotesTarget} onPullContract={() => pullContract(a)}/>
+            <AssetRow key={a.id} asset={a} onUnmask={()=>setUnmaskTarget(a)} toast={toast} setAssets={setAssets} engageSniper={engageSniper} setNotesTarget={setNotesTarget} onPullContract={() => pullContract(a)} setView={setView} setSelectedAsset={setSelectedAsset}/>
           ))}
         </div>
       </div>
@@ -772,8 +772,25 @@ const MiniStat = ({ label, value, accent='text-white' }) => (
   </div>
 )
 
-const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTarget, onPullContract }) => {
+const TeleChip = ({ label, value }) => {
+  const raw = String(value ?? '').trim()
+  const verified = raw.length > 0
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-sm border ${verified?'border-zinc-700':'border-zinc-800'} bg-zinc-900/60 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.08em]`}>
+      <span className="text-zinc-600">{label}</span>
+      <span className={verified ? 'text-zinc-300' : 'text-zinc-600'}>{verified ? raw : 'UNVERIFIED'}</span>
+    </span>
+  )
+}
+
+const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTarget, onPullContract, setView, setSelectedAsset }) => {
   const [open, setOpen] = useState(false)
+
+  // CRYPTO VALUATION MATRIX :: defensive null-coalescing (NaN-proof)
+  const arv = asset?.arv ?? 0;
+  const rehab = asset?.rehab_estimate ?? asset?.rehab ?? 0;
+  const fee = asset?.fee ?? 0;
+  const mao = Math.max(0, Math.round((Number(arv) * 0.7) - Number(rehab) - Number(fee)));
 
   return (
     <div className="group relative grid grid-cols-[2.2fr_1fr_1fr_1fr_1.3fr_0.9fr_1.2fr_0.4fr] items-center gap-4 border-b border-zinc-800/80 px-6 py-3.5 transition-all hover:bg-cyan-400/[0.025]">
@@ -789,11 +806,29 @@ const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTar
             <span className="h-0.5 w-0.5 rounded-full bg-zinc-700"/>
             <span className="truncate">{asset.city}</span>
           </div>
+          {/* PARCEL TELEMETRY :: strict optional chaining - degrades to UNVERIFIED when Supabase payload is sparse */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <TeleChip label="YB"   value={asset?.specs?.yearBuilt    || 'UNVERIFIED'} />
+            <TeleChip label="SF"   value={asset?.specs?.sqft         || 'UNVERIFIED'} />
+            <TeleChip label="LOT"  value={asset?.specs?.lotSize      || 'UNVERIFIED'} />
+            <TeleChip label="TYPE" value={asset?.specs?.structureType || 'UNVERIFIED'} />
+          </div>
         </div>
       </div>
       <StatusPill status={asset.status}/>
       <div className="font-mono text-sm font-semibold text-cyan-400">{fmt(asset.arv)}</div>
-      <div className="font-mono text-sm font-semibold text-white">{fmt(Math.max(0, Math.round((Number(asset.arv)||0)*0.7 - (Number(asset.rehab_estimate)||Number(asset.rehab)||0))))}</div>
+      <div className="group/mao relative">
+        <span className="cursor-help border-b border-dashed border-white/25 font-mono text-sm font-semibold text-white">{fmt(mao)}</span>
+        <div className="pointer-events-none absolute left-1/2 top-full z-30 mt-1.5 w-80 -translate-x-1/2 rounded-md border border-white/10 bg-black/80 p-2 shadow-2xl backdrop-blur-md opacity-0 transition-opacity duration-150 group-hover/mao:opacity-100">
+          <div className="font-mono text-[8px] tracking-[0.3em] text-cyan-400">/// CRYPTO VALUATION MATRIX</div>
+          <div className="mt-1.5 space-y-1 font-mono text-[9px] text-zinc-300">
+            <div className="flex justify-between"><span className="text-zinc-500">ARV x 70%</span><span>{fmt(Math.round(Number(arv) * 0.7))}</span></div>
+            <div className="flex justify-between"><span className="text-zinc-500">- Est. Rehab</span><span>- {fmt(rehab)}</span></div>
+            <div className="flex justify-between"><span className="text-zinc-500">- Assignment Fee</span><span>- {fmt(fee)}</span></div>
+            <div className="flex justify-between border-t border-white/20 pt-1 text-cyan-300"><span>(ARV x 70%) - Rehab - Fee</span><span>= {fmt(mao)}</span></div>
+          </div>
+        </div>
+      </div>
       <HeatBar value={asset.heat}/>
       <FlagPill delinquent={asset.taxDelq} years={asset.taxYears}/>
       <div className="min-w-0">
@@ -806,7 +841,7 @@ const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTar
           <div className="absolute right-0 top-10 z-20 w-60 overflow-hidden rounded-md border border-zinc-800 bg-zinc-900/70 shadow-2xl">
             <div className="border-b border-zinc-800 px-3 py-2 font-mono text-[9px] tracking-[0.3em] text-zinc-500">/// ACTION MATRIX</div>
             <ActionItem icon={Eye}          label="UNMASK LLC"        hint="Pierce corporate veil"      onClick={()=>{setOpen(false);onUnmask()}}/>
-            <ActionItem icon={Zap}          label="ENGAGE SV-1500"    hint="AI line-item rehab"         onClick={()=>{setOpen(false);toast('SV-1500 ENGAGED','Underwriting '+asset.address)}}/>
+            <ActionItem icon={Zap}          label="ENGAGE SV-1500"    hint="Batch route to AI terminal"  onClick={() => { setOpen(false); setSelectedAsset(asset); setView('core'); }} />
             <ActionItem icon={FileText}     label="GENERATE CONTRACT" hint="Auto-draft assignment"      onClick={()=>{setOpen(false);toast('CONTRACT QUEUED','Drafting assignment for '+asset.id)}}/>
             <ActionItem icon={Printer}      label="PULL CONTRACT"     hint="Generate PDF assignment"   onClick={() => generateContractPDF(asset, toast)} />
             <ActionItem icon={ArrowUpRight} label="PUSH TO LIVE BOARD" hint="Move to escrow kanban" onClick={()=>{setOpen(false);toast('PUSHED','Asset routed to Live Board')}}/>
@@ -817,7 +852,7 @@ const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTar
       </div>
       <div className="pointer-events-none col-span-8 -mt-1 flex justify-end gap-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
         <QuickBtn icon={Eye}      label="UNMASK LLC"        onClick={onUnmask}/>
-        <QuickBtn icon={Zap} label="ENGAGE SV-1500" onClick={()=>{handleSV1500Scan(asset, setAssets, toast)}}/>
+        <QuickBtn icon={Zap} label="ENGAGE SV-1500" onClick={() => { setSelectedAsset(asset); setView('core'); }} />
         <QuickBtn icon={FileText} label="GENERATE CONTRACT" onClick={()=>{handleContractForge(asset, setAssets, toast)}}/>
         <QuickBtn icon={Download} label="📄 Pull Contract" onClick={() => onPullContract(asset)}/>
           <QuickBtn icon={FileText} label="NOTES" onClick={() => setNotesTarget(asset)}/>
@@ -945,7 +980,7 @@ const KanbanCard = ({ asset, canAdvance, onAdvance, engageSniper }) => (
 // ============================================================================
 //  VIEW 3 :: SV-1500 CORE (AI Underwriter)
 // ============================================================================
-const SV1500View = ({ assets, ghostFetch, toast }) => {
+const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
   const queue = useMemo(() => assets.filter(a => ['Raw Lead','Underwriting'].includes(a.status)), [assets])
   const [selected, setSelected] = useState(queue[0] || null)
   const [lines, setLines] = useState([])
@@ -980,6 +1015,13 @@ const SV1500View = ({ assets, ghostFetch, toast }) => {
         setRunning(false);
       }
     }
+
+  // BATCHED NAVIGATION :: vault-routed asset auto-engages the core terminal on arrival
+  useEffect(() => {
+    if (!selectedAsset) return;
+    setSelected(selectedAsset);
+    engage(selectedAsset);
+  }, [selectedAsset]);
 
 
   return (
@@ -1409,6 +1451,7 @@ const ApexTerminal = () => {
   return () => subscription.unsubscribe();
   }, []);
   const [view, setView] = useState('vault')
+  const [selectedAsset, setSelectedAsset] = useState(null)
     const [assets, setAssets] = useState([]);
 
   React.useEffect(() => {
@@ -1522,10 +1565,10 @@ const ApexTerminal = () => {
       <main className="relative ml-[250px] min-h-screen">
         <TopBar view={view}/>
         {view==='war'    && <WarRoomView    assets={assets}/>}
-        {view==='vault'  && <AssetVaultView assets={assets} setAssets={setAssets} ghostFetch={ghostFetch} toast={toast}/>}
+        {view==='vault'  && <AssetVaultView assets={assets} setAssets={setAssets} ghostFetch={ghostFetch} toast={toast} setView={setView} setSelectedAsset={setSelectedAsset}/>}
         {view==='board'  && <LiveBoardView  assets={assets} setAssets={setAssets} ghostFetch={ghostFetch} toast={toast}/>}
         {view==='escrow' && <DigitalEscrowView assets={assets} ghostFetch={ghostFetch} toast={toast}/>}
-        {view==='core'   && <SV1500View     assets={assets} ghostFetch={ghostFetch} toast={toast}/>}
+        {view==='core'   && <SV1500View     assets={assets} ghostFetch={ghostFetch} toast={toast} selectedAsset={selectedAsset}/>}
       </main>
 
       <ToastStack toasts={toasts} onClose={closeToast}/>
