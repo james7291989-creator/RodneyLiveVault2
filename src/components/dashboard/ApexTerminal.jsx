@@ -1144,6 +1144,7 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
           </div>
         </div>
 
+        <div className="flex flex-col gap-3 w-full">
         {/* Terminal */}
         <div className="relative overflow-hidden rounded-md border border-cyan-500/30 bg-black shadow-[0_0_60px_-15px_rgba(0,229,255,0.5)]">
           <div className="flex items-center justify-between border-b border-cyan-500/20 bg-zinc-950 px-4 py-2">
@@ -1183,9 +1184,10 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
 
         {/* APEX PHASE 4: INTERACTIVE TERMINAL CHAT */}
                 {/* APEX PHASE 4: INTERACTIVE TERMINAL CHAT */}
-        <div className="mt-4">
+        <div className="w-full mt-2">
           <ApexChatInput onTransmit={handleChatSubmit} isProcessing={running} />
         </div>
+      </div>
       </div>
     </div>
   )
