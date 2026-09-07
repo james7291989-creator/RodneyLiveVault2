@@ -1,4 +1,5 @@
-import ZeroCostMap from './ZeroCostMap';
+﻿import ZeroCostMap from './ZeroCostMap';
+import ApexChatInput from '../ApexChatInput';
 
 import React from 'react';
 import { supabase } from '../../supabaseClient';
@@ -1181,17 +1182,10 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
         </div>
 
         {/* APEX PHASE 4: INTERACTIVE TERMINAL CHAT */}
-        <form onSubmit={handleChatSubmit} className="mt-4 flex items-center gap-2">
-          <input
-            value={chatInput}
-            onChange={e => setChatInput(e.target.value)}
-            placeholder="Ask the neural underwriter..."
-            className="h-10 flex-1 rounded-md border border-cyan-500/30 bg-black px-4 font-mono text-sm text-cyan-200 placeholder:text-zinc-600 focus:border-cyan-400 focus:outline-none"
-          />
-          <button type="submit" className="flex h-10 items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 font-mono text-xs font-bold tracking-[0.1em] text-cyan-300 hover:bg-cyan-500/20">
-            <Zap className="h-3.5 w-3.5"/>TRANSMIT
-          </button>
-        </form>
+                {/* APEX PHASE 4: INTERACTIVE TERMINAL CHAT */}
+        <div className="mt-4">
+          <ApexChatInput onTransmit={handleChatSubmit} isProcessing={running} />
+        </div>
       </div>
     </div>
   )
