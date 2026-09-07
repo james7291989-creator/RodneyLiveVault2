@@ -1047,71 +1047,88 @@ const KanbanCard = ({ asset, canAdvance, onAdvance, engageSniper }) => (
 //  VIEW 3 :: SV-1500 CORE (AI Underwriter)
 // ============================================================================
 const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
-  const queue = useMemo(() => assets.filter(a => ['Raw Lead','Underwriting'].includes(a.status)), [assets])
-  const [selected, setSelected] = useState(queue[0] || null)
-  const [lines, setLines] = useState([])
-  const [chatInput, setChatInput] = useState('')
-  const [running, setRunning] = useState(false)
-  const timers = useRef([])
+  const queue = React.useMemo(() => assets.filter(a => ['Raw Lead','Underwriting'].includes(a.status)), [assets])
+  const [selected, setSelected] = React.useState(queue[0] || null)
+  const [lines, setLines] = React.useState([])
+  const [running, setRunning] = React.useState(false)
+  const timers = React.useRef([])
+  const terminalEndRef = React.useRef(null)
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), [])
+  // Auto-scroll the terminal on every new line
+  React.useEffect(() => {
+    if (terminalEndRef.current) {
+      terminalEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [lines])
 
-      // APEX PHASE 5: LIVE AI CHAT PAYLOAD — Render Edge `/api/v1/analyze/chat` uplink
-  const handleChatSubmit = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-    const query = chatInput;
+  React.useEffect(() => () => timers.current.forEach(clearTimeout), [])
+
+  const handleChatSubmit = async (queryText) => {
+    if (!queryText.trim() || running) return;
+    const query = queryText;
     setLines(prev => [...prev, `>>> [USER]: ${query}`, `>>> [SV-1500]: Processing query...`]);
-    setChatInput('');
-
+    setRunning(true); // Locks the UI
+    
     try {
       const response = await fetch((process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com') + '/api/v1/analyze/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId: selected?.id, address: selected?.address, query: query })
+        body: JSON.stringify({ 
+          assetId: selected?.id, 
+          address: selected?.address, 
+          arv: selected?.arv,
+          rehab: selected?.rehab_estimate || selected?.rehab,
+          query: query 
+        })
       });
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
-      setLines(prev => [...prev, `>>> [SV-1500]: ${data.reply || data.message || 'Analysis complete.'}`]);
+      setLines(prev => {
+        const newLines = [...prev];
+        newLines[newLines.length - 1] = `>>> [SV-1500]: ${data.reply || data.message || 'Analysis complete.'}`;
+        return newLines;
+      });
     } catch (err) {
-      setLines(prev => [...prev, `>>> [SV-1500 ERROR]: Render Edge API unreachable for chat payload.`]);
+      setLines(prev => {
+        const newLines = [...prev];
+        newLines[newLines.length - 1] = `>>> [SV-1500 ERROR]: Render API unreachable.`;
+        return newLines;
+      });
+    } finally {
+      setRunning(false);
     }
   };
 
-      const engage = async (asset) => {
-      timers.current.forEach(clearTimeout); timers.current = [];
-      setSelected(asset); setLines(['>>> INITIATING QUANTUM UPLINK...', '>>> [SYSTEM]: Neural Underwriter initialized. Strict Missouri real estate compliance enforced. Fraud detection active.', `>>> ANALYZING ASSET: ${asset.address}`]); setRunning(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const token = session ? session.access_token : 'DEV_OVERRIDE';
-        setLines(prev => [...prev, '>>> NEGOTIATING SECURE HANDSHAKE...', '>>> ANALYZING ASSET: ' + asset.address]);
-        const response = await fetch((process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com') + '/api/v1/analyze/quantum', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify({ asset: asset })
-        });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        const data = await response.json();
-        const outputLines = data.analysis ? data.analysis?.split('\n') : [JSON.stringify(data, null, 2)];
-        setLines(prev => [...prev, ...outputLines, '>>> SV-1500 UNDERWRITING COMPLETE.']);
-        toast('SV-1500 COMPLETE', asset.address + ' analyzed');
-      } catch (error) {
-        setLines(prev => [...prev, '>>> [FATAL UPLINK ERROR]: ' + error.message, '>>> IS FLASK SERVER ONLINE?']);
-      } finally {
-        setRunning(false);
-      }
+  const engage = async (asset) => {
+    if (running) return;
+    setSelected(asset); 
+    setLines(['>>> INITIATING QUANTUM UPLINK...', '>>> [SYSTEM]: Neural Underwriter initialized.', `>>> ANALYZING ASSET: ${asset.address}`]); 
+    setRunning(true);
+    try {
+      const token = 'DEV_OVERRIDE';
+      setLines(prev => [...prev, '>>> NEGOTIATING SECURE HANDSHAKE...']);
+      const response = await fetch((process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com') + '/api/v1/analyze/quantum', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ asset: asset })
+      });
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const data = await response.json();
+      const outputLines = data.analysis ? data.analysis.split('\n') : [JSON.stringify(data, null, 2)];
+      setLines(prev => [...prev, ...outputLines, '>>> SV-1500 UNDERWRITING COMPLETE.']);
+      toast('SV-1500 COMPLETE', asset.address + ' analyzed');
+    } catch (error) {
+      setLines(prev => [...prev, '>>> [FATAL UPLINK ERROR]: ' + error.message]);
+    } finally {
+      setRunning(false);
     }
+  }
 
-  // BATCHED NAVIGATION :: vault-routed asset auto-engages the core terminal on arrival
-  useEffect(() => {
+  React.useEffect(() => {
     if (!selectedAsset) return;
-    setSelected(selectedAsset);
+    if (selected?.id === selectedAsset.id && lines.length > 0) return; // Stop double-firing
     engage(selectedAsset);
   }, [selectedAsset]);
-
 
   return (
     <div className="px-8 pt-8 pb-16">
@@ -1123,7 +1140,6 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
       <p className="mt-1 max-w-xl text-sm text-zinc-500">{queue.length} assets queued for line-item AI underwriting.</p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[340px_1fr]">
-        {/* Queue */}
         <div className="rounded-md border border-zinc-800 bg-zinc-900">
           <div className="border-b border-zinc-800 px-4 py-3 font-mono text-[10px] tracking-[0.25em] text-zinc-500">/// UNDERWRITING QUEUE</div>
           <div className="max-h-[520px] overflow-y-auto">
@@ -1145,54 +1161,51 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
         </div>
 
         <div className="flex flex-col gap-3 w-full">
-        {/* Terminal */}
-        <div className="relative overflow-hidden rounded-md border border-cyan-500/30 bg-black shadow-[0_0_60px_-15px_rgba(0,229,255,0.5)]">
-          <div className="flex items-center justify-between border-b border-cyan-500/20 bg-zinc-950 px-4 py-2">
-            <div className="flex items-center gap-2">
-              <Terminal className="h-3.5 w-3.5 text-cyan-400"/>
-              <span className="font-mono text-[10px] tracking-[0.25em] text-cyan-400">SV-1500 :: AI READOUT</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-red-500/60"/>
-              <span className="h-2 w-2 rounded-full bg-amber-500/60"/>
-              <span className="h-2 w-2 rounded-full bg-emerald-500/60"/>
-            </div>
-          </div>
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{backgroundImage:'repeating-linear-gradient(0deg,rgba(0,229,255,0.4) 0,rgba(0,229,255,0.4) 1px,transparent 1px,transparent 3px)'}}/>
-          <div className="relative h-[480px] overflow-y-auto p-5 font-mono text-[12px] leading-relaxed text-cyan-300">
-            {!selected ? (
-              <div className="flex h-full items-center justify-center text-center text-zinc-600">
-                <div>
-                  <Brain className="mx-auto mb-3 h-10 w-10 text-cyan-500/40"/>
-                  <div className="font-mono text-[10px] tracking-[0.3em] text-cyan-500/60">/// SELECT AN ASSET TO ENGAGE</div>
-                </div>
+          <div className="relative overflow-hidden rounded-md border border-cyan-500/30 bg-black shadow-[0_0_60px_-15px_rgba(0,229,255,0.5)]">
+            <div className="flex items-center justify-between border-b border-cyan-500/20 bg-zinc-950 px-4 py-2">
+              <div className="flex items-center gap-2">
+                <Terminal className="h-3.5 w-3.5 text-cyan-400"/>
+                <span className="font-mono text-[10px] tracking-[0.25em] text-cyan-400">SV-1500 :: AI READOUT</span>
               </div>
-            ) : (
-              <>
-                <div className="mb-3 border-b border-cyan-500/20 pb-2 font-mono text-[11px] tracking-[0.2em] text-cyan-500/80">
-                  ╔══ ASSET {selected.id} :: {selected.address.toUpperCase()} ══╗
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-red-500/60"/>
+                <span className="h-2 w-2 rounded-full bg-amber-500/60"/>
+                <span className="h-2 w-2 rounded-full bg-emerald-500/60"/>
+              </div>
+            </div>
+            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{backgroundImage:'repeating-linear-gradient(0deg,rgba(0,229,255,0.4) 0,rgba(0,229,255,0.4) 1px,transparent 1px,transparent 3px)'}}/>
+            <div className="relative h-[480px] overflow-y-auto p-5 font-mono text-[12px] leading-relaxed text-cyan-300">
+              {!selected ? (
+                <div className="flex h-full items-center justify-center text-center text-zinc-600">
+                  <div>
+                    <Brain className="mx-auto mb-3 h-10 w-10 text-cyan-500/40"/>
+                    <div className="font-mono text-[10px] tracking-[0.3em] text-cyan-500/60">/// SELECT AN ASSET TO ENGAGE</div>
+                  </div>
                 </div>
-                {lines.map((l,i)=>(
-                  <div key={i} className="animate-[type_.18s_ease]">{l}</div>
-                ))}
-                {running && <div className="mt-1 inline-block h-3 w-2 animate-pulse bg-cyan-400 align-middle"/>}
-              </>
-            )}
+              ) : (
+                <>
+                  <div className="mb-3 border-b border-cyan-500/20 pb-2 font-mono text-[11px] tracking-[0.2em] text-cyan-500/80">
+                    ╔═══ ASSET {selected.id} :: {selected.address.toUpperCase()} ═══╗
+                  </div>
+                  {lines.map((l,i)=>(
+                    <div key={i} className="animate-[type_.18s_ease]">{l}</div>
+                  ))}
+                  {running && <div className="mt-1 inline-block h-3 w-2 animate-pulse bg-cyan-400 align-middle"/>}
+                  <div ref={terminalEndRef} />
+                </>
+              )}
+            </div>
+            <style jsx="true">{`@keyframes type{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:translateX(0)}}`}</style>
           </div>
-          <style jsx="true">{`@keyframes type{from{opacity:0;transform:translateX(-3px)}to{opacity:1;transform:translateX(0)}}`}</style>
-        </div>
 
-        {/* APEX PHASE 4: INTERACTIVE TERMINAL CHAT */}
-                {/* APEX PHASE 4: INTERACTIVE TERMINAL CHAT */}
-        <div className="w-full mt-2">
-          <ApexChatInput onTransmit={handleChatSubmit} isProcessing={running} />
+          <div className="w-full mt-2">
+            <ApexChatInput onTransmit={handleChatSubmit} isProcessing={running} />
+          </div>
         </div>
-      </div>
       </div>
     </div>
   )
 }
-
 // ============================================================================
 //  VIEW 4 :: DIGITAL ESCROW (Contract Generator)
 // ============================================================================
