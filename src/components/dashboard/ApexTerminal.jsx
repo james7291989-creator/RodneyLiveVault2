@@ -1078,6 +1078,7 @@ const SV1500View = ({ assets, ghostFetch, toast, selectedAsset }) => {
           address: selected?.address, 
           arv: selected?.arv,
           rehab: selected?.rehab_estimate || selected?.rehab,
+              fee: selected?.fee || 15000,
           query: query 
         })
       });
