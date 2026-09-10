@@ -1,4 +1,4 @@
-import SubscriptionGate from './SubscriptionGate';
+﻿import SubscriptionGate from './SubscriptionGate';
 import ZeroCostMap from './ZeroCostMap';
 import React from 'react';
 import { supabase } from '../../supabaseClient';
@@ -67,8 +67,8 @@ const WEEKLY_FLOW = [
 const SKIP_TRACE = {}
 
 const DEFAULT_TRACE = (name, address) => ({
-  type:'Natural Person', formed:'—', registeredAgent:'—',
-  principal:name, address:address || 'Unknown — last seen public record',
+  type:'Natural Person', formed:'â€”', registeredAgent:'â€”',
+  principal:name, address:address || 'Unknown â€” last seen public record',
   phones: ["/// COMING SOON ///"],
   emails: ["/// COMING SOON ///"],
   relatedEntities:[], confidence:72 + Math.floor(Math.random()*18),
@@ -243,7 +243,7 @@ const StatusPill = ({ status }) => (
 const FlagPill = ({ delinquent, years }) =>
   delinquent ? (
     <span className="inline-flex items-center gap-1.5 rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-red-400 shadow-[0_0_10px_-4px_rgba(239,68,68,0.7)]">
-      <ShieldAlert className="h-3 w-3"/>TAX DELQ{years?` · ${years}Y`:''}
+      <ShieldAlert className="h-3 w-3"/>TAX DELQ{years?` Â· ${years}Y`:''}
     </span>
   ) : (
     <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-700/60 bg-gray-700/10 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500">
@@ -282,7 +282,7 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
   const handleSV1500Scan = async (asset, setAssets, toast) => {
     try {
       toast(`>>> INITIATING SV-1500 UPLINK: ${asset.address}...`);
-      const aiResponse = await fetch((process.env.REACT_APP_API_URL || "http://localhost:5000") + "/api/v1/analyze/quantum", {
+      const aiResponse = await fetch((process.env.REACT_APP_API_URL || "https://apex-sv1500-core.onrender.com") + "/api/v1/analyze/quantum", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer LOCAL_TESTING" },
         body: JSON.stringify({ address: asset.address })
@@ -299,7 +299,7 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
   const handleContractForge = async (asset, setAssets, toast) => {
     try {
       toast(`>>> FORGING ENVELOPE: ${asset.address}...`);
-      const forgeResponse = await fetch((process.env.REACT_APP_API_URL || "http://localhost:5000") + "/api/fire_contract", {
+      const forgeResponse = await fetch((process.env.REACT_APP_API_URL || "https://apex-sv1500-core.onrender.com") + "/api/fire_contract", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer LOCAL_TESTING" },
         body: JSON.stringify({ 
@@ -345,7 +345,7 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
               <Eye className="h-3.5 w-3.5 text-cyan-300"/>
             </div>
             <div>
-              <div className="font-mono text-[10px] tracking-[0.25em] text-cyan-400">/// LLC PIERCER · v3</div>
+              <div className="font-mono text-[10px] tracking-[0.25em] text-cyan-400">/// LLC PIERCER Â· v3</div>
               <div className="text-sm font-semibold text-gray-100">UNMASKING CORPORATE VEIL</div>
             </div>
           </div>
@@ -356,7 +356,7 @@ const UnmaskModal = ({ asset, onClose, ghostFetch }) => {
           <div className="flex flex-col items-center justify-center px-6 py-20">
             <Loader2 className="h-7 w-7 animate-spin text-cyan-400"/>
             <div className="mt-4 font-mono text-[11px] tracking-[0.25em] text-cyan-300">PIERCING VEIL...</div>
-            <div className="mt-1 font-mono text-[10px] tracking-[0.2em] text-gray-600">QUERYING SOS · NETRONLINE · LEXISNEXIS</div>
+            <div className="mt-1 font-mono text-[10px] tracking-[0.2em] text-gray-600">QUERYING SOS Â· NETRONLINE Â· LEXISNEXIS</div>
           </div>
         ) : (
           <div className="px-6 py-5">
@@ -587,7 +587,7 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
             /// AUTOMATION COMMANDS
           </div>
           <button onClick={()=>setBuyBoxOpen(o=>!o)} className="mt-2 flex h-9 items-center gap-2 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 font-mono text-xs font-bold tracking-[0.1em] text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_18px_-4px_rgba(0,229,255,0.7)]">
-            <span className={buyBoxOpen?'text-amber-400':'text-cyan-400'}>{buyBoxOpen?'⚠':'⚡'}</span>
+            <span className={buyBoxOpen?'text-amber-400':'text-cyan-400'}>{buyBoxOpen?'âš ':'âš¡'}</span>
             {buyBoxOpen?'DE-ENGAGE SNIPER':'ENGAGE SNIPER'}
           </button>
           <style jsx="true">{`@keyframes shimmer{100%{transform:translateX(100%)}}`}</style>
@@ -624,7 +624,7 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast }) => {
       <div className="mt-4 overflow-visible rounded-md border border-gray-800 bg-[#0A0A0A]">
         <div className="grid grid-cols-[2.2fr_1fr_1fr_1fr_1.3fr_0.9fr_1.2fr_0.4fr] gap-4 border-b border-gray-800 bg-[#0C0C0C] px-6 py-3.5 font-mono text-[10px] tracking-[0.18em] text-gray-500">
           <span>TARGET ASSET</span><span>STATUS</span><span>SV-1500 ARV</span><span>MAO</span>
-          <span>DEAL HEAT</span><span>FLAGS</span><span>OWNER</span><span className="text-right">···</span>
+          <span>DEAL HEAT</span><span>FLAGS</span><span>OWNER</span><span className="text-right">Â·Â·Â·</span>
         </div>
         <div>
           {filtered.length===0 ? (
@@ -673,7 +673,7 @@ const AssetRow = ({ asset, onUnmask, toast }) => {
       <FlagPill delinquent={asset.taxDelq} years={asset.taxYears}/>
       <div className="min-w-0">
         <div className="truncate text-xs font-medium text-gray-200">{asset.owner}</div>
-        <div className="font-mono text-[10px] tracking-wider text-gray-600">{asset.entityType==='LLC'?'CORP · LLC':'NATURAL PERSON'}</div>
+        <div className="font-mono text-[10px] tracking-wider text-gray-600">{asset.entityType==='LLC'?'CORP Â· LLC':'NATURAL PERSON'}</div>
       </div>
       <div className="relative flex justify-end">
         <button onClick={()=>setOpen(o=>!o)} className="flex h-8 w-8 items-center justify-center rounded-md border border-transparent text-gray-500 hover:border-gray-800 hover:bg-[#0E0E0E] hover:text-cyan-400"><MoreHorizontal className="h-4 w-4"/></button>
@@ -753,7 +753,7 @@ const LiveBoardView = ({ assets, setAssets, ghostFetch, toast }) => {
     <div className="px-8 pt-8 pb-16">
       <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.35em] text-cyan-400">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,229,255,0.9)]"/>
-        ESCROW PIPELINE · REAL-TIME
+        ESCROW PIPELINE Â· REAL-TIME
       </div>
       <h1 className="mt-2 text-4xl font-bold tracking-[0.04em] text-white">LIVE <span className="text-cyan-400">BOARD</span></h1>
       <p className="mt-1 max-w-xl text-sm text-gray-500">{assets.length} assets routing through {PIPELINE.length}-stage escrow funnel.</p>
@@ -787,7 +787,7 @@ const KanbanCard = ({ asset, canAdvance, onAdvance, engageSniper }) => (
     <div className="flex items-start justify-between gap-2">
       <div className="min-w-0">
         <div className="truncate text-xs font-semibold text-gray-100">{asset.address}</div>
-        <div className="font-mono text-[9px] tracking-wider text-gray-600">{asset.id} · {asset.city?.split(',')[0]}</div>
+        <div className="font-mono text-[9px] tracking-wider text-gray-600">{asset.id} Â· {asset.city?.split(',')[0]}</div>
       </div>
       {asset.taxDelq && <FlagPill delinquent={true} years={asset.taxYears}/>}
     </div>
@@ -802,7 +802,7 @@ const KanbanCard = ({ asset, canAdvance, onAdvance, engageSniper }) => (
           <ArrowRight className="h-3 w-3"/>ADV
         </button>
       ) : (
-        <span className="font-mono text-[9px] tracking-[0.2em] text-emerald-400">✓ TERMINAL</span>
+        <span className="font-mono text-[9px] tracking-[0.2em] text-emerald-400">âœ“ TERMINAL</span>
       )}
     </div>
   </div>
@@ -827,7 +827,7 @@ const SV1500View = ({ assets, ghostFetch, toast }) => {
         const { data: { session } } = await supabase.auth.getSession();
         const token = session ? session.access_token : 'DEV_OVERRIDE';
         setLines(prev => [...prev, '>>> NEGOTIATING SECURE HANDSHAKE...', '>>> ANALYZING ASSET: ' + asset.address]);
-        const response = await fetch('http://localhost:5000/api/v1/analyze/quantum', {
+        const response = await fetch('https://apex-sv1500-core.onrender.com/api/v1/analyze/quantum', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -852,7 +852,7 @@ const SV1500View = ({ assets, ghostFetch, toast }) => {
     <div className="px-8 pt-8 pb-16">
       <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.35em] text-cyan-400">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,229,255,0.9)]"/>
-        NEURAL UNDERWRITER · QUANTUM CORE v15
+        NEURAL UNDERWRITER Â· QUANTUM CORE v15
       </div>
       <h1 className="mt-2 text-4xl font-bold tracking-[0.04em] text-white">SV-1500 <span className="text-cyan-400">CORE</span></h1>
       <p className="mt-1 max-w-xl text-sm text-gray-500">{queue.length} assets queued for line-item AI underwriting.</p>
@@ -871,7 +871,7 @@ const SV1500View = ({ assets, ghostFetch, toast }) => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-gray-100">{a.address}</div>
-                  <div className="font-mono text-[10px] tracking-wider text-gray-600">{a.id} · {a.status}</div>
+                  <div className="font-mono text-[10px] tracking-wider text-gray-600">{a.id} Â· {a.status}</div>
                 </div>
                 <HeatBar value={a.heat}/>
               </button>
@@ -904,7 +904,7 @@ const SV1500View = ({ assets, ghostFetch, toast }) => {
             ) : (
               <>
                 <div className="mb-3 border-b border-cyan-500/20 pb-2 font-mono text-[11px] tracking-[0.2em] text-cyan-500/80">
-                  ╔══ ASSET {selected.id} :: {selected.address.toUpperCase()} ══╗
+                  â•”â•â• ASSET {selected.id} :: {selected.address.toUpperCase()} â•â•â•—
                 </div>
                 {lines.map((l,i)=>(
                   <div key={i} className="animate-[type_.18s_ease]">{l}</div>
@@ -990,7 +990,7 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
     <div className="px-8 pt-8 pb-16">
       <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.35em] text-cyan-400">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,229,255,0.9)]"/>
-        ASSIGNMENT CONTRACT FORGE · NOTARY-READY
+        ASSIGNMENT CONTRACT FORGE Â· NOTARY-READY
       </div>
       <h1 className="mt-2 text-4xl font-bold tracking-[0.04em] text-white">DIGITAL <span className="text-cyan-400">ESCROW</span></h1>
       <p className="mt-1 max-w-xl text-sm text-gray-500">{pool.length} assets eligible for assignment drafting.</p>
@@ -1006,7 +1006,7 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-gray-100">{a.address}</div>
-                  <div className="font-mono text-[10px] tracking-wider text-gray-600">{a.id} · MAO {fmt(Math.max(0, Math.round((Number(a.arv)||0)*0.7 - (Number(a.rehab_estimate)||Number(a.rehab)||0))))}</div>
+                  <div className="font-mono text-[10px] tracking-wider text-gray-600">{a.id} Â· MAO {fmt(Math.max(0, Math.round((Number(a.arv)||0)*0.7 - (Number(a.rehab_estimate)||Number(a.rehab)||0))))}</div>
                 </div>
                 <StatusPill status={a.status}/>
               </button>
@@ -1037,14 +1037,14 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
                 <div className="text-center">
                   <Loader2 className="mx-auto h-7 w-7 animate-spin text-cyan-400"/>
                   <div className="mt-4 font-mono text-[11px] tracking-[0.25em] text-cyan-300">FORGING DOCUMENT...</div>
-                  <div className="mt-1 font-mono text-[10px] tracking-[0.2em] text-gray-600">INJECTING ASSET · ENTITY · MAO</div>
+                  <div className="mt-1 font-mono text-[10px] tracking-[0.2em] text-gray-600">INJECTING ASSET Â· ENTITY Â· MAO</div>
                 </div>
               </div>
             ) : (
               /* Stylized "document" sheet */
               <div className="mx-auto max-w-2xl rounded-sm bg-[#F5F1E8] p-10 font-serif text-gray-900 shadow-[0_0_60px_-15px_rgba(0,229,255,0.3)]">
                 <div className="flex items-center justify-between border-b border-gray-400 pb-3 text-[10px] tracking-[0.2em] text-gray-600">
-                  <span>RODNEY &amp; SONS · LEGAL DEPT</span><span>{doc.number}</span>
+                  <span>RODNEY &amp; SONS Â· LEGAL DEPT</span><span>{doc.number}</span>
                 </div>
                 <h2 className="mt-6 text-center text-xl font-bold tracking-[0.15em]">ASSIGNMENT OF REAL ESTATE PURCHASE CONTRACT</h2>
                 <p className="mt-6 text-[13px] leading-relaxed">
@@ -1093,7 +1093,7 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
                   </div>
                 </div>
                 <div className="mt-8 border-t border-gray-400 pt-3 text-center text-[9px] tracking-[0.3em] text-gray-500">
-                  AUTO-GENERATED BY SV-1500 CORE · NOTARY READY · {doc.number}
+                  AUTO-GENERATED BY SV-1500 CORE Â· NOTARY READY Â· {doc.number}
                 </div>
               </div>
             )}
@@ -1127,17 +1127,17 @@ const WarRoomView = ({ assets }) => {
     <div className="px-8 pt-8 pb-16">
       <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.35em] text-cyan-400">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,229,255,0.9)]"/>
-        EXECUTIVE COMMAND · LIVE FEED
+        EXECUTIVE COMMAND Â· LIVE FEED
       </div>
       <h1 className="mt-2 text-4xl font-bold tracking-[0.04em] text-white">WAR <span className="text-cyan-400">ROOM</span></h1>
-      <p className="mt-1 max-w-xl text-sm text-gray-500">Global pipeline telemetry · all systems operational.</p>
+      <p className="mt-1 max-w-xl text-sm text-gray-500">Global pipeline telemetry Â· all systems operational.</p>
 
       {/* Mega counters */}
       <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
         <MegaCounter label="TOTAL PIPELINE VALUE" value={fmtCompact(pipeline)} icon={TrendingUp} accent="text-cyan-300" glow="rgba(0,229,255,0.5)" sub={`${assets.length} active assets`}/>
         <MegaCounter label="CAPITAL DEPLOYED"     value={fmtCompact(deployed)} icon={DollarSign} accent="text-emerald-300" glow="rgba(16,185,129,0.5)" sub="MAO in flight"/>
         <MegaCounter label="ACTIVE ESCROWS"       value={String(escrows).padStart(2,'0')} icon={Crown} accent="text-amber-300" glow="rgba(245,158,11,0.5)" sub={`${closed} closed YTD`}/>
-        <MegaCounter label="AVG DEAL HEAT"        value={String(avgHeat).padStart(2,'0')+'°'} icon={Flame} accent="text-red-300" glow="rgba(239,68,68,0.4)" sub={`${delq} delinquent`}/>
+        <MegaCounter label="AVG DEAL HEAT"        value={String(avgHeat).padStart(2,'0')+'Â°'} icon={Flame} accent="text-red-300" glow="rgba(239,68,68,0.4)" sub={`${delq} delinquent`}/>
       </div>
 
       {/* Charts */}
@@ -1147,7 +1147,7 @@ const WarRoomView = ({ assets }) => {
           <div className="flex items-center justify-between">
             <div>
               <div className="font-mono text-[10px] tracking-[0.25em] text-gray-500">/// WEEKLY DEAL FLOW</div>
-              <div className="mt-1 text-sm font-semibold text-gray-200">Lead Ingestion · Contracts · Closes</div>
+              <div className="mt-1 text-sm font-semibold text-gray-200">Lead Ingestion Â· Contracts Â· Closes</div>
             </div>
             <div className="flex items-center gap-3 font-mono text-[10px] tracking-wider">
               <LegendDot color="bg-cyan-400"     label="LEADS"/>
@@ -1200,7 +1200,7 @@ const WarRoomView = ({ assets }) => {
                     <div className="truncate text-xs font-medium text-gray-100">{a.address}</div>
                     <div className="font-mono text-[10px] tracking-wider text-gray-600">{fmt(Math.max(0, Math.round((Number(a.arv)||0)*0.7 - (Number(a.rehab_estimate)||Number(a.rehab)||0))))}</div>
                   </div>
-                  <span className="font-mono text-sm font-bold text-cyan-300">{a.heat}°</span>
+                  <span className="font-mono text-sm font-bold text-cyan-300">{a.heat}Â°</span>
                 </div>
               ))}
             </div>
@@ -1275,7 +1275,7 @@ const TopBar = ({ view }) => {
           <div className="flex items-center gap-2 rounded-md border border-gray-800 bg-[#0C0C0C] px-3 py-1.5 font-mono text-[10px] tracking-wider text-gray-400">
             <Clock className="h-3 w-3 text-cyan-400"/>
             {new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})}
-            <span className="text-gray-600">·</span>
+            <span className="text-gray-600">Â·</span>
             <span className="text-emerald-400">SECURE</span>
           </div>
           <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-cyan-500/40 bg-cyan-500/10 px-3 font-mono text-[10px] font-semibold tracking-[0.18em] text-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_18px_-4px_rgba(0,229,255,0.7)]">

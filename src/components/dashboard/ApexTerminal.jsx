@@ -362,7 +362,7 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
   const handleSV1500Scan = async (asset, setAssets, toast) => {
     try {
       toast(`>>> INITIATING SV-1500 UPLINK: ${asset.address}...`);
-      const aiResponse = await fetch((process.env.REACT_APP_API_URL || "http://localhost:5000") + "/api/v1/analyze/quantum", {
+      const aiResponse = await fetch((process.env.REACT_APP_API_URL || "https://apex-sv1500-core.onrender.com") + "/api/v1/analyze/quantum", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer LOCAL_TESTING" },
         body: JSON.stringify({ address: asset.address })
@@ -379,7 +379,7 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
   const handleContractForge = async (asset, setAssets, toast) => {
     try {
       toast(`>>> FORGING ENVELOPE: ${asset.address}...`);
-      const forgeResponse = await fetch((process.env.REACT_APP_API_URL || "http://localhost:5000") + "/api/fire_contract", {
+      const forgeResponse = await fetch((process.env.REACT_APP_API_URL || "https://apex-sv1500-core.onrender.com") + "/api/fire_contract", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer LOCAL_TESTING" },
         body: JSON.stringify({ 
@@ -1025,7 +1025,7 @@ const KanbanCard = ({ asset, canAdvance, onAdvance, engageSniper }) => (
     </div>
     <div className="mt-2 grid grid-cols-2 gap-2 rounded-md border border-zinc-800/70 bg-zinc-900 p-2">
       <div><div className="font-mono text-[9px] tracking-wider text-zinc-500">ARV</div><div className="font-mono text-xs font-semibold text-cyan-400">{fmt(asset.arv)}</div></div>
-      <div><div className="font-mono text-[9px] tracking-wider text-zinc-500">MAO</div><div className="font-mono text-xs font-semibold text-white">{fmt(Math.max(0, Math.round((Number(asset.arv)||0)*0.7 - (Number(asset.rehab_estimate)||Number(asset.rehab)||0))))}</div></div>
+      <div><div className="font-mono text-[9px] tracking-wider text-zinc-500">MAO</div><div className="font-mono text-xs font-semibold text-white">{fmt(Math.max(0, Math.round((Number(asset.arv)||0)*0.7 - (Number(asset.rehab_estimate)||Number(asset.rehab)||0) - (Number(asset.fee)||0))))}</div></div>
     </div>
     <div className="mt-2 flex items-center justify-between">
       <HeatBar value={asset.heat}/>
@@ -1254,7 +1254,7 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-zinc-100">{a.address}</div>
-                  <div className="font-mono text-[10px] tracking-wider text-zinc-600">{a.id} · MAO {fmt(Math.max(0, Math.round((Number(a.arv)||0)*0.7 - (Number(a.rehab_estimate)||Number(a.rehab)||0))))}</div>
+                  <div className="font-mono text-[10px] tracking-wider text-zinc-600">{a.id} · MAO {fmt(Math.max(0, Math.round((Number(a.arv)||0)*0.7 - (Number(a.rehab_estimate)||Number(a.rehab)||0) - (Number(a.fee)||0))))}</div>
                 </div>
                 <StatusPill status={a.status}/>
               </button>
@@ -1449,7 +1449,7 @@ const WarRoomView = ({ assets }) => {
                 <div key={a.id} className="flex items-center justify-between gap-3 rounded-md border border-zinc-800/80 bg-zinc-900/70 p-2">
                   <div className="min-w-0">
                     <div className="truncate text-xs font-medium text-zinc-100">{a.address}</div>
-                    <div className="font-mono text-[10px] tracking-wider text-zinc-600">{fmt(Math.max(0, Math.round((Number(a.arv)||0)*0.7 - (Number(a.rehab_estimate)||Number(a.rehab)||0))))}</div>
+                    <div className="font-mono text-[10px] tracking-wider text-zinc-600">{fmt(Math.max(0, Math.round((Number(a.arv)||0)*0.7 - (Number(a.rehab_estimate)||Number(a.rehab)||0) - (Number(a.fee)||0))))}</div>
                   </div>
                   <span className="font-mono text-sm font-bold text-cyan-300">{a.heat}°</span>
                 </div>
@@ -1688,6 +1688,7 @@ const ApexTerminal = () => {
 }
 
 export default ApexTerminal
+
 
 
 

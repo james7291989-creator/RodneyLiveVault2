@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { FileSignature, Download, CheckCircle, Clock, ShieldCheck, FileText, Lock, Plus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -31,9 +31,9 @@ export default function Contracts() {
     if (!isGodMode) return alert("RESTRICTED: Gold Tier or higher required to auto-generate legal contracts.");
     
     setIsGenerating(true);
-    // Future Python Hook: fetch('https://rodney-vault-api.onrender.com/api/generate-contract', { method: 'POST' })
+    // Future Python Hook: fetch('https://apex-sv1500-core.onrender.com/api/generate-contract', { method: 'POST' })
     setTimeout(() => {
-      alert("✅ [SYSTEM LOG] Missouri Assignment PDF Generated successfully via Python backend. Ready for download.");
+      alert("âœ… [SYSTEM LOG] Missouri Assignment PDF Generated successfully via Python backend. Ready for download.");
       setIsGenerating(false);
     }, 2000);
   };

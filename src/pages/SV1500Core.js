@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Terminal, Database, Server, Cpu, Play, AlertTriangle, ShieldAlert, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -34,7 +34,7 @@ export default function SV1500Core() {
     addLog(`Initiating stealth sequence: ${botName}...`);
     try {
       // Striking the live Render Python Backend
-      const response = await fetch(`https://rodney-vault-api.onrender.com/api/trigger/${botName}`, {
+      const response = await fetch(`https://apex-sv1500-core.onrender.com/api/trigger/${botName}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });

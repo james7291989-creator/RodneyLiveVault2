@@ -18,7 +18,7 @@ export default function AIChat() {
 
     try {
       // THE APEX FIX: Hardwired directly to the live Render Engine.
-      const apiUrl = 'https://rodney-vault-api.onrender.com';
+      const apiUrl = 'https://apex-sv1500-core.onrender.com';
       
       const res = await axios.post(`${apiUrl}/api/ai-analyze`, {
         prompt: userMsg

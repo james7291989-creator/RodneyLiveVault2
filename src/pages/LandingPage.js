@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Cpu, ArrowRight, Diamond, Lock, FileText, Mail, Building2, Layers, Scale, Crosshair, Upload, AlertTriangle } from 'lucide-react';
 import { supabase } from '../supabaseClient'; 
@@ -22,7 +22,7 @@ export default function LandingPage() {
     localStorage.setItem('companyName', formData.company.toUpperCase() || 'AUTHORIZED ENTITY');
     
     try {
-      console.log("🚀 INITIATING DIRECT TRANSMISSION TO SUPABASE VAULT...");
+      console.log("ðŸš€ INITIATING DIRECT TRANSMISSION TO SUPABASE VAULT...");
       
       // 1. STRIKE THE DATABASE (Lead Capture)
       const { error } = await supabase
@@ -34,19 +34,19 @@ export default function LandingPage() {
         }]);
 
       if (error) throw error;
-      console.log("📡 DATABASE PAYLOAD SECURED");
+      console.log("ðŸ“¡ DATABASE PAYLOAD SECURED");
       
       // 2. STRIKE THE ENGINE (Fire Brevo Email Cannon)
       try {
-         console.log("🚀 INITIATING RENDER CLOUD IGNITION FOR EMAIL...");
-         await fetch('https://rodney-vault-api.onrender.com/api/send-welcome', {
+         console.log("ðŸš€ INITIATING RENDER CLOUD IGNITION FOR EMAIL...");
+         await fetch('https://apex-sv1500-core.onrender.com/api/send-welcome', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: formData.name, email: formData.email })
          });
-         console.log("✉️ EMAIL CANNON FIRED");
+         console.log("âœ‰ï¸ EMAIL CANNON FIRED");
       } catch (err) {
-         console.log("⚠️ Email cannon misfire (Check Render Logs):", err);
+         console.log("âš ï¸ Email cannon misfire (Check Render Logs):", err);
       }
 
       // 3. THE VELVET ROPE UI (Acceptance Screen)
@@ -55,7 +55,7 @@ export default function LandingPage() {
       }, 1500);
 
     } catch (error) {
-      console.error("❌ CRITICAL ENGINE FAILURE:");
+      console.error("âŒ CRITICAL ENGINE FAILURE:");
       console.error(error.message);
       console.error(error);
       alert(`TRANSMISSION FAILED: ${error.message}\n\nCheck F12 Console for full telemetry.`);
@@ -250,7 +250,7 @@ export default function LandingPage() {
               The St. Louis real estate market is choked by middlemen, outdated MLS data, and slow-moving brokerages. <strong className="text-white">Rodney & Sons was engineered to bypass the friction entirely.</strong> We are not agents seeking commissions. We operate as a direct-to-investor wholesale pipeline, securing highly distressed, off-market assets before the public grid even knows they exist.
             </p>
             <p>
-              We do the heavy lifting in the dirt. Our proprietary systems scrape county data, target tax delinquencies, and secure LRA properties, isolating only the highest-yield targets. But we don't just hand you a raw list. When a property hits our Vault, our <strong className="text-[#80DEEA]">Quantum Core AI</strong> has already underwritten the deal—instantly calculating the After Repair Value (ARV) and precise line-item rehab estimates.
+              We do the heavy lifting in the dirt. Our proprietary systems scrape county data, target tax delinquencies, and secure LRA properties, isolating only the highest-yield targets. But we don't just hand you a raw list. When a property hits our Vault, our <strong className="text-[#80DEEA]">Quantum Core AI</strong> has already underwritten the dealâ€”instantly calculating the After Repair Value (ARV) and precise line-item rehab estimates.
             </p>
             <p>
               You don't need another broker. You need a supply chain. From autonomous deal discovery to generating flawless, title-compliant assignment contracts with a single click, Rodney & Sons provides the complete infrastructure required to rapidly acquire assets and scale your portfolio.

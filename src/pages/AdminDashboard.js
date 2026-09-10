@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Map from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const API_BASE = "https://rodney-vault-api.onrender.com";
+const API_BASE = "https://apex-sv1500-core.onrender.com";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
 
     setIsUnmasking(true); setUnmaskedEntity(null);
     try {
-      const response = await fetch('https://rodney-vault-api.onrender.com/api/unmask', {
+      const response = await fetch('https://apex-sv1500-core.onrender.com/api/unmask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: customAddress })
       });
       const data = await response.json();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ContractSniper({ property }) {
@@ -18,7 +18,7 @@ export default function ContractSniper({ property }) {
 
     try {
       // Pointing directly to your live Render Python backend
-      const API_URL = process.env.REACT_APP_API_URL || 'https://rodney-vault-api.onrender.com';
+      const API_URL = process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com';
       
       const response = await fetch(`${API_URL}/api/contract/snipe`, {
         method: 'POST',
