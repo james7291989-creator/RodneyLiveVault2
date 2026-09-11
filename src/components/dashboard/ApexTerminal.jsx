@@ -382,11 +382,45 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
               if (dbErr) throw dbErr;
               console.log('[SYSTEM LOG] Supabase hallucination eradicated. DB aligned with Render Math.');
               // NOW WE UPDATE THE SCREEN:
+                    // APEX OVERRIDE: FATAL RACE CONDITION ERADICATED
+      if (aiData && aiData.estimated_arv && aiData.mao) {
+          try {
+              console.log('[SYSTEM LOG] Initiating Supabase Override for Asset ID:', asset.id);
+              const { error: dbErr } = await supabase.from('missouri_properties').update({
+                  arv: aiData.estimated_arv,
+                  mao: aiData.mao,
+                  status: 'Underwriting'
+              }).eq('id', asset.id);
+              if (dbErr) throw dbErr;
+              console.log('[SYSTEM LOG] Supabase hallucination eradicated. DB aligned with Render Math.');
+              // NOW WE UPDATE THE SCREEN:
               setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, status: 'Underwriting', arv: aiData.estimated_arv, mao: aiData.mao } : a));
           } catch (dbErr) { console.error('[FATAL] Supabase write-back failed:', dbErr); }
       } else {
           // Fallback if Render fails to return raw numbers
           setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, status: 'Underwriting' } : a));
+      }
+          } catch (dbErr) { console.error('[FATAL] Supabase write-back failed:', dbErr); }
+      } else {
+          // Fallback if Render fails to return raw numbers
+                // APEX OVERRIDE: FATAL RACE CONDITION ERADICATED
+      if (aiData && aiData.estimated_arv && aiData.mao) {
+          try {
+              console.log('[SYSTEM LOG] Initiating Supabase Override for Asset ID:', asset.id);
+              const { error: dbErr } = await supabase.from('missouri_properties').update({
+                  arv: aiData.estimated_arv,
+                  mao: aiData.mao,
+                  status: 'Underwriting'
+              }).eq('id', asset.id);
+              if (dbErr) throw dbErr;
+              console.log('[SYSTEM LOG] Supabase hallucination eradicated. DB aligned with Render Math.');
+              // NOW WE UPDATE THE SCREEN:
+              setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, status: 'Underwriting', arv: aiData.estimated_arv, mao: aiData.mao } : a));
+          } catch (dbErr) { console.error('[FATAL] Supabase write-back failed:', dbErr); }
+      } else {
+          // Fallback if Render fails to return raw numbers
+          setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, status: 'Underwriting' } : a));
+      }
       }
       // APEX OVERRIDE: AUTONOMOUS SUPABASE WRITE-BACK
       if (aiData && aiData.estimated_arv && aiData.mao) {
