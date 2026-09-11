@@ -104,7 +104,7 @@ const buildAssignmentDoc = (asset) => {
     assignee: 'TBD - Buyers List',
     property: asset.address || 'Address Not Found',
     purchase: safePurchasePrice,
-    assignmentFee: 10000
+    assignmentFee: Number(asset.fee) || 15000
   };
 };
 
@@ -939,7 +939,7 @@ const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTar
   const arv = asset?.arv ?? 0;
   const rehab = asset?.rehab_estimate ?? asset?.rehab ?? 0;
   const fee = asset?.fee ?? 0;
-  const mao = Math.max(0, Math.round((Number(arv) * 0.7) - Number(rehab) - Number(fee)));
+  const mao = Number(asset.mao) || 0;
 
   return (
     <div className="group relative grid grid-cols-[2.2fr_1fr_1fr_1fr_1.3fr_0.9fr_1.2fr_0.4fr] items-center gap-4 border-b border-zinc-800/80 px-6 py-3.5 transition-all hover:bg-cyan-400/[0.025]">
