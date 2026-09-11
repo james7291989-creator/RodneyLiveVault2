@@ -371,6 +371,21 @@ const StatCard = ({ label, value, accent='text-white', sub, icon:Icon }) => (
       
       if (aiResponse.ok) {
         setAssets(prev => prev.map(a => a.id === asset.id ? { ...a, status: 'Underwriting', arv: aiData.estimated_arv, mao: aiData.mao } : a));
+      // APEX OVERRIDE: AUTONOMOUS SUPABASE WRITE-BACK
+      if (aiData && aiData.estimated_arv && aiData.mao) {
+          try {
+              console.log('[SYSTEM LOG] Initiating Supabase Override for Asset ID:', asset.id);
+              const { error: dbErr } = await supabase.from('missouri_properties').update({
+                  arv: aiData.estimated_arv,
+                  mao: aiData.mao,
+                  status: 'Underwriting'
+              }).eq('id', asset.id);
+              if (dbErr) throw dbErr;
+              console.log('[SYSTEM LOG] Supabase hallucination eradicated. DB aligned with Render Math.');
+          } catch (dbErr) {
+              console.error('[FATAL] Supabase write-back failed:', dbErr);
+          }
+      }
         toast(`[SV-1500 SUCCESS] MAO Calculated: ${aiData.mao.toLocaleString()}. Routed to Underwriting.`);
       } else { toast(`[SV-1500 WARN] ${aiData.error}`); }
     } catch (e) { toast("[SV-1500 ERROR] Python Engine Offline."); }
