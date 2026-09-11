@@ -721,8 +721,23 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSele
       const { data: { user } } = await supabase.auth.getUser();
       
       // 2. Generate SV-1500 AI Pipeline Metrics
-      const calcArv = 120000 + Math.floor(Math.random() * 220000);
-      const calcRehab = 22000 + Math.floor(Math.random() * 60000);
+            // APEX OVERRIDE: ERADICATED RANDOM MOCK DATA
+      let trueArv = 0; let trueMao = 0; let trueRehab = 30000;
+      try {
+          console.log('[SYSTEM LOG] Bypassing mock data. Routing new lead directly to Render Backend...');
+          const res = await fetch('https://apex-sv1500-core.onrender.com/api/v1/analyze/quantum', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ asset: { address: searchInput } })
+          });
+          const quantumData = await res.json();
+          if (quantumData.estimated_arv) {
+              trueArv = quantumData.estimated_arv;
+              trueMao = quantumData.mao;
+              console.log('[SYSTEM LOG] Intake successfully acquired God-Tier math from Render.');
+          }
+      } catch (err) { console.error('[FATAL] Render Intake Routing Failed:', err); }
+      const calcArv = trueArv;
+      const calcRehab = trueRehab;
 
       // 3. Inject directly into the live Supabase architecture
       const { data: newAsset, error } = await supabase
