@@ -722,15 +722,15 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSele
 
       // 2. Query Render Quantum Engine for absolute verified math
       console.log('[SYSTEM LOG] Querying Render Backend for:', targetAddress);
-      let calcArv = 110000;
-      let calcMao = 18000;
-      let calcRehab = 30000;
+      let calcArv = 0;
+      let calcMao = 0;
+      let calcRehab = 0;
 
       try {
           const res = await fetch('https://apex-sv1500-core.onrender.com/api/v1/analyze/quantum', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ asset: { address: targetAddress, fee: 15000 } })
+              body: JSON.stringify({ asset: { address: targetAddress, fee: 15000, arv: 0, rehab_estimate: 0 } })
           });
           const quantumData = await res.json();
           if (quantumData.estimated_arv && quantumData.mao) {
@@ -971,7 +971,7 @@ const AssetRow = ({ asset, onUnmask, toast, setAssets, engageSniper, setNotesTar
         <div className="pointer-events-none absolute left-1/2 top-full z-30 mt-1.5 w-80 -translate-x-1/2 rounded-md border border-white/10 bg-black/80 p-2 shadow-2xl backdrop-blur-md opacity-0 transition-opacity duration-150 group-hover/mao:opacity-100">
           <div className="font-mono text-[8px] tracking-[0.3em] text-cyan-400">/// CRYPTO VALUATION MATRIX</div>
           <div className="mt-1.5 space-y-1 font-mono text-[9px] text-zinc-300">
-            <div className="flex justify-between"><span className="text-zinc-500">ARV x 70%</span><span>{fmt(Math.round(Number(arv) * 0.7))}</span></div>
+            <div className="flex justify-between"><span className="text-zinc-500">ARV x 70%</span><span>{fmt(Number(asset.mao) + Number(asset.rehab_estimate || asset.rehab || 0) + Number(asset.fee || 15000))}</span></div>
             <div className="flex justify-between"><span className="text-zinc-500">- Est. Rehab</span><span>- {fmt(rehab)}</span></div>
             <div className="flex justify-between"><span className="text-zinc-500">- Assignment Fee</span><span>- {fmt(fee)}</span></div>
             <div className="flex justify-between border-t border-white/20 pt-1 text-cyan-300"><span>(ARV x 70%) - Rehab - Fee</span><span>= {fmt(mao)}</span></div>
