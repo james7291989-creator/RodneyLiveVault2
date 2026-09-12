@@ -94,7 +94,7 @@ const buildAssignmentDoc = (asset) => {
   const arv = Number(asset.arv) || 0;
   const rehab = Number(asset.rehab_estimate) || Number(asset.rehab) || 0;
   const mao = Number(asset.mao)||0;
-  const safePurchasePrice = mao > 0 ? mao : 0;
+  const safePurchasePrice = Number(asset.mao) || 0;
   const safeId = asset.id ? String(asset.id).substring(0, 6).toUpperCase() : 'XXXXXX';
   return {
     number: 'ASGN-' + safeId + '-26',
