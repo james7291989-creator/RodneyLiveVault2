@@ -1,4 +1,4 @@
-﻿import { executeQuantumScan } from '../lib/quantumBridge';
+import { executeQuantumScan } from '../lib/quantumBridge';
 import ZeroCostMap from './ZeroCostMap';
 import ApexChatInput from '../ApexChatInput';
 
@@ -11,7 +11,7 @@ import { supabase } from '../../supabaseClient';
  * -----------------------------------------------------------------------------
  * 5 Views   :: Asset Vault | Live Board | SV-1500 Core | Digital Escrow | War Room
  * Pattern   :: Single-file client component, useState view router, shared assets
- * Backend   :: Ghost-piped to http://localhost:8000/api/* (catch -> simulate)
+ * Backend   :: Live Render uplink via quantumBridge (REACT_APP_QUANTUM_API_URL -> apex-sv1500-core)
  * Theme     :: Deep Zinc Dark Mode (zinc-950 / zinc-900 / zinc-800 · #00E5FF cyan)
  * ============================================================================= */
 
@@ -646,6 +646,80 @@ const Field = ({ label, value, accent }) => (
     <div className={`mt-1 text-xs ${accent?'text-cyan-300 font-semibold':'text-zinc-200'}`}>{value}</div>
   </div>
 )
+const ToggleGroup = ({ label, value, onChange, options }) => (
+  <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+    <div className="font-mono text-[9px] tracking-[0.25em] text-zinc-500">{label}</div>
+    <div className="mt-1 flex flex-wrap gap-1">
+      {options.map(opt => (
+        <button
+          key={opt}
+          onClick={() => onChange(opt)}
+          className={`rounded-md border px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider ${value === opt ? 'border-cyan-500/60 bg-cyan-500/15 text-cyan-300' : 'border-zinc-700 bg-zinc-900 text-zinc-500 hover:border-zinc-600 hover:text-zinc-300'}`}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+const TriExitPanel = ({ data }) => {
+  const exits = data && data.exits ? data.exits : null;
+  const geocode = data && data.geocode ? data.geocode : null;
+  const intel = data && data.seller_intel ? data.seller_intel : null;
+  const cash = exits && exits.cash_mao ? exits.cash_mao : null;
+  const dscr = exits && exits.dscr ? exits.dscr : null;
+  const crv = exits && exits.creative ? exits.creative : null;
+  const dscrRatio = dscr && typeof dscr.dscr_ratio === 'number' ? dscr.dscr_ratio : 0;
+  const dscrClass = dscrRatio >= 1.25 ? 'text-emerald-400' : (dscrRatio >= 1.0 ? 'text-amber-400' : 'text-red-400');
+  const coc = crv && typeof crv.cash_on_cash_y1 === 'number' ? (crv.cash_on_cash_y1 * 100).toFixed(1) : '--';
+  return (
+    <div className="mt-3 rounded-md border border-cyan-500/30 bg-zinc-900/80 p-3">
+      <div className="flex items-center justify-between">
+        <div className="font-mono text-[9px] tracking-[0.3em] text-cyan-400">/// TRI-ENGINE EXITS</div>
+        {geocode && (
+          <div className="font-mono text-[8px] tracking-[0.15em] text-zinc-500">
+            {geocode.zip ? 'ZIP ' + geocode.zip : 'NO ZIP'} · {geocode.lat && geocode.lon ? 'GEO LOCKED' : 'GEO PENDING'} · {geocode.postgis_radius_ready ? 'R 0.5MI READY' : 'R 0.5MI PREP'}
+          </div>
+        )}
+      </div>
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="rounded-md border border-zinc-800 bg-zinc-900 p-3">
+          <div className="font-mono text-[9px] tracking-[0.2em] text-zinc-500">A · CASH MAO</div>
+          <div className="mt-1 text-lg font-bold text-cyan-300">{cash ? fmt(cash.offer) : '\u2014'}</div>
+          <div className="font-mono text-[8px] text-zinc-600">{cash ? 'ARV x 0.70 - Rehab - Fee' : 'AWAITING ENGINE'}</div>
+        </div>
+        <div className="rounded-md border border-zinc-800 bg-zinc-900 p-3">
+          <div className="font-mono text-[9px] tracking-[0.2em] text-zinc-500">B · DSCR RENTAL</div>
+          <div className={`mt-1 text-lg font-bold ${dscrClass}`}>{dscr ? dscrRatio.toFixed(2) : '\u2014'}</div>
+          <div className="font-mono text-[8px] text-zinc-600">{dscr ? 'Rent ' + fmt(dscr.monthly_gross_rent) + '/mo' : 'AWAITING ENGINE'}</div>
+          <div className={`font-mono text-[8px] ${dscrClass}`}>{dscr ? dscr.verdict : ''}</div>
+        </div>
+        <div className="rounded-md border border-zinc-800 bg-zinc-900 p-3">
+          <div className="font-mono text-[9px] tracking-[0.2em] text-zinc-500">C · CREATIVE</div>
+          <div className="mt-1 text-lg font-bold text-purple-400">{crv ? fmt(crv.entry_fee) : '\u2014'}</div>
+          <div className="font-mono text-[8px] text-zinc-600">{crv ? 'Entry Fee / COC ' + coc + '%' : 'AWAITING ENGINE'}</div>
+        </div>
+      </div>
+      {intel && (
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1">
+            <div className="font-mono text-[8px] tracking-[0.2em] text-zinc-500">ABSENTEE</div>
+            <div className="font-mono text-[10px] text-zinc-300">{intel.absentee ? 'YES' : 'AWAITING DATA'}</div>
+          </div>
+          <div className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1">
+            <div className="font-mono text-[8px] tracking-[0.2em] text-zinc-500">TENURE</div>
+            <div className="font-mono text-[10px] text-zinc-300">{intel.tenure_years ? intel.tenure_years + ' YRS' : 'AWAITING DATA'}</div>
+          </div>
+          <div className="rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1">
+            <div className="font-mono text-[8px] tracking-[0.2em] text-zinc-500">EQUITY</div>
+            <div className="font-mono text-[10px] text-zinc-300">{intel.equity ? fmt(intel.equity) : 'AWAITING DATA'}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ============================================================================
 //  VIEW 1 :: ASSET VAULT
@@ -660,6 +734,12 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSele
   const [pin, setPin] = useState(null)
   const [unmaskTarget, setUnmaskTarget] = useState(null);
   const [notesTarget, setNotesTarget] = useState(null);
+  // SV-1500 PHASE 2 kill-switch state :: type / condition / fee + tri-engine results
+  const [scanType, setScanType] = useState('SFR');
+  const [scanCondition, setScanCondition] = useState('Standard');
+  const [scanFee, setScanFee] = useState(15000);
+  const [scanResults, setScanResults] = useState(null);
+  const [sellerIntel, setSellerIntel] = useState(null);
 
   // APEX OVERRIDE: TITANIUM VIEWPORT V2 (DOM LOCK)
   React.useEffect(() => {
@@ -712,82 +792,68 @@ const AssetVaultView = ({ assets, setAssets, ghostFetch, toast, setView, setSele
   const pullContract = (asset) => generateContractPDF(asset, toast);
 
         const runScan = async () => {
-if (!scanInput.trim() || scanning) return;
-setScanning(true);
-setPin(null);
-const targetAddress = scanInput.trim();
+          if (!scanInput.trim() || scanning) return;
+          setScanning(true);
+          setPin(null);
+          const targetAddress = scanInput.trim();
 
-try {
-  const { data: { user } } = await supabase.auth.getUser();
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
 
-  console.log('[SYSTEM LOG] Querying Render Backend for:', targetAddress);
-        // >>> APEX DATA LAKE OVERRIDE <<<
-      setTerminalHistory(prev => [...prev, >>> ANALYZING ASSET: ]);
-      
-      const quantumData = await executeQuantumScan(normalizedAsset);
-      
-      let calcArv = quantumData.estimated_arv || 0;
-      let calcMao = quantumData.mao || 0;
-      
-      setArv(calcArv);
-      setMao(calcMao);
-      
-      if (quantumData.analysis) {
-          const lines = quantumData.analysis.split('\n');
-          lines.forEach((line, index) => {
-              setTimeout(() => {
-                  setTerminalHistory(prev => [...prev, line]);
-              }, index * 200);
-          });
-      }
+            console.log('[SYSTEM LOG] Querying Render Backend for:', targetAddress);
 
-  try {
-      const res = await fetch((process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com') + '/api/v1/analyze/quantum', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ asset: { address: targetAddress, fee: 15000 } })
-      });
-      const quantumData = await res.json();
-      if (quantumData.estimated_arv && quantumData.mao) {
-          calcArv = Number(quantumData.estimated_arv);
-          calcMao = Number(quantumData.mao);
-          console.log('[SYSTEM LOG] Render Math Acquired -> ARV:', calcArv, 'MAO:', calcMao);
-      }
-  } catch (err) {
-      console.error('[FATAL] Render Engine unreachable during intake:', err);
-  }
+            // Single canonical engine call - kill-switch payload wired from UI state (Phase 2)
+            const quantumData = await executeQuantumScan({
+              address: targetAddress,
+              fee: scanFee,
+              type: scanType,
+              condition: scanCondition
+            });
 
-  const { data: newAsset, error } = await supabase
-    .from('missouri_properties')
-    .insert([{
-      user_id: user?.id,
-      address: targetAddress,
-      county: 'St. Louis City',
-      deal_status: 'Active',
-      arv: calcArv,
-      mao: calcMao,
-      rehab_estimate: calcRehab,
-      assignment_fee: 15000,
-      status: 'Underwriting'
-    }])
-    .select()
-    .single();
+            const calcArv = Number(quantumData.estimated_arv) || 0;
+            const calcMao = Number(quantumData.mao) || 0;
+            const calcRehab = Number(quantumData.repair_estimates) || 0;
 
-  if (error) throw error;
+            setScanResults(quantumData && typeof quantumData === 'object' ? quantumData : null);
+            setSellerIntel(quantumData && quantumData.seller_intel ? quantumData.seller_intel : null);
 
-  setPin({ x: 20 + Math.random() * 70, y: 20 + Math.random() * 60 });
-  setAssets(prev => [newAsset, ...prev]);
-  setScanInput('');
-  setScanning(false);
-  if (typeof toast === 'function') toast('SV-1500 SCAN COMPLETE', targetAddress + ' securely indexed with verified math.');
+            if (quantumData.analysis) {
+              quantumData.analysis.split('\n').forEach((line) => {
+                if (typeof toast === 'function') toast('SV-1500 READOUT', line);
+              });
+            }
 
-} catch (error) {
-  console.error('SV-1500 FAILURE:', error);
-  alert('APEX SYSTEM ERROR: ' + (error.message || error.toString()));
-  setScanning(false);
-}
-}
+            const { data: newAsset, error } = await supabase
+              .from('missouri_properties')
+              .insert([{
+                user_id: user?.id,
+                address: targetAddress,
+                county: 'St. Louis City',
+                deal_status: 'Active',
+                arv: calcArv,
+                mao: calcMao,
+                rehab_estimate: calcRehab,
+                assignment_fee: scanFee,
+                status: 'Underwriting'
+              }])
+              .select()
+              .single();
 
+            if (error) throw error;
+
+            const hydrated = { ...newAsset, property_type: scanType, condition: scanCondition };
+            setAssets(prev => [hydrated, ...prev]);
+            setPin({ x: 20 + Math.random() * 70, y: 20 + Math.random() * 60 });
+            setScanInput('');
+            setScanning(false);
+            if (typeof toast === 'function') toast('SV-1500 SCAN COMPLETE', targetAddress + ' securely indexed with verified math.');
+          } catch (error) {
+            console.error('SV-1500 FAILURE:', error);
+            if (typeof toast === 'function') toast('SV-1500 ERROR', error.message || error.toString());
+            else alert('APEX SYSTEM ERROR: ' + (error.message || error.toString()));
+            setScanning(false);
+          }
+        };
   // APEX PHASE 3: AUTONOMOUS DEAL INJECTION — Global Engage Sniper
   const fireSniperInjection = async () => {
     setScanning(true);
@@ -865,6 +931,27 @@ try {
               {!scanning && <span className="absolute inset-0 -translate-x-full animate-[shimmer_2.5s_infinite] bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent"/>}
             </button>
           </div>
+
+          {/* /// PHASE 2 KILL-SWITCHES :: type / condition / target fee /// */}
+          <div className="mt-3 grid grid-cols-[1fr_1fr_1.3fr] gap-2">
+            <ToggleGroup label="PROP TYPE" value={scanType} onChange={setScanType} options={['SFR','MULTI','MOBILE']} />
+            <ToggleGroup label="CONDITION" value={scanCondition} onChange={setScanCondition} options={['Cosmetic','Standard','Gut']} />
+            <div className="rounded-md border border-zinc-800 bg-zinc-900/70 p-2">
+              <div className="font-mono text-[9px] tracking-[0.25em] text-zinc-500">TARGET ASSIGNMENT FEE</div>
+              <div className="mt-1 flex items-center justify-between">
+                <button onClick={()=>setScanFee(Math.max(0, scanFee - 2500))} className="h-6 w-6 rounded border border-zinc-700 text-zinc-400 hover:bg-zinc-800">-</button>
+                <span className="flex-1 text-center font-mono text-xs font-bold text-cyan-300">{fmt(scanFee)}</span>
+                <button onClick={()=>setScanFee(Math.min(100000, scanFee + 2500))} className="h-6 w-6 rounded border border-zinc-700 text-zinc-400 hover:bg-zinc-800">+</button>
+              </div>
+            </div>
+          </div>
+
+          {scanResults && <TriExitPanel data={scanResults} />}
+          {sellerIntel && !scanResults && (
+            <div className="mt-3 rounded-md border border-dashed border-zinc-700 bg-zinc-900/60 p-3 font-mono text-[10px] text-zinc-500">
+              /// SELLER INTELLIGENCE UNAVAILABLE - COUNTY RECORDER SCHEMA PENDING
+            </div>
+          )}
           <div className="mt-4 grid grid-cols-3 gap-2">
             <MiniStat label="INDEXED ARV"      value={fmtCompact(totals.arv)} accent="text-cyan-400"/>
             <MiniStat label="CAPITAL CAP"      value={fmtCompact(totals.mao)}/>
@@ -1122,7 +1209,7 @@ const KanbanCard = ({ asset, canAdvance, onAdvance, engageSniper }) => (
     </div>
     <div className="mt-2 grid grid-cols-2 gap-2 rounded-md border border-zinc-800/70 bg-zinc-900 p-2">
       <div><div className="font-mono text-[9px] tracking-wider text-zinc-500">ARV</div><div className="font-mono text-xs font-semibold text-cyan-400">{fmt(asset.arv)}</div></div>
-      <div><div className="font-mono text-[9px] tracking-wider text-zinc-500">MAO</div><div className="font-mono text-xs font-semibold text-white">{fmt((Number(asset.mao)||0)}</div></div>
+      <div><div className="font-mono text-[9px] tracking-wider text-zinc-500">MAO</div><div className="font-mono text-xs font-semibold text-white">{fmt(Number(asset.mao)||0)}</div></div>
     </div>
     <div className="mt-2 flex items-center justify-between">
       <HeatBar value={asset.heat}/>
@@ -1351,7 +1438,7 @@ const DigitalEscrowView = ({ assets, ghostFetch, toast }) => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-zinc-100">{a.address}</div>
-                  <div className="font-mono text-[10px] tracking-wider text-zinc-600">{a.id} · MAO {fmt((Number(a.mao)||0)}</div>
+                  <div className="font-mono text-[10px] tracking-wider text-zinc-600">{a.id} · MAO {fmt(Number(a.mao)||0)}</div>
                 </div>
                 <StatusPill status={a.status}/>
               </button>
@@ -1546,7 +1633,7 @@ const WarRoomView = ({ assets }) => {
                 <div key={a.id} className="flex items-center justify-between gap-3 rounded-md border border-zinc-800/80 bg-zinc-900/70 p-2">
                   <div className="min-w-0">
                     <div className="truncate text-xs font-medium text-zinc-100">{a.address}</div>
-                    <div className="font-mono text-[10px] tracking-wider text-zinc-600">{fmt((Number(a.mao)||0)}</div>
+                    <div className="font-mono text-[10px] tracking-wider text-zinc-600">{fmt(Number(a.mao)||0)}</div>
                   </div>
                   <span className="font-mono text-sm font-bold text-cyan-300">{a.heat}°</span>
                 </div>
