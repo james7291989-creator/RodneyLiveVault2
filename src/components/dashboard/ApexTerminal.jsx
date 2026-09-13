@@ -1,4 +1,5 @@
-﻿import ZeroCostMap from './ZeroCostMap';
+﻿import { executeQuantumScan } from '../lib/quantumBridge';
+import ZeroCostMap from './ZeroCostMap';
 import ApexChatInput from '../ApexChatInput';
 
 import React from 'react';
@@ -720,9 +721,25 @@ try {
   const { data: { user } } = await supabase.auth.getUser();
 
   console.log('[SYSTEM LOG] Querying Render Backend for:', targetAddress);
-  let calcArv = 110000;
-  let calcRehab = 30000;
-  let calcMao = 18000;
+        // >>> APEX DATA LAKE OVERRIDE <<<
+      setTerminalHistory(prev => [...prev, >>> ANALYZING ASSET: ]);
+      
+      const quantumData = await executeQuantumScan(normalizedAsset);
+      
+      let calcArv = quantumData.estimated_arv || 0;
+      let calcMao = quantumData.mao || 0;
+      
+      setArv(calcArv);
+      setMao(calcMao);
+      
+      if (quantumData.analysis) {
+          const lines = quantumData.analysis.split('\n');
+          lines.forEach((line, index) => {
+              setTimeout(() => {
+                  setTerminalHistory(prev => [...prev, line]);
+              }, index * 200);
+          });
+      }
 
   try {
       const res = await fetch((process.env.REACT_APP_API_URL || 'https://apex-sv1500-core.onrender.com') + '/api/v1/analyze/quantum', {
